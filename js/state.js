@@ -350,15 +350,48 @@ class StateStore {
   }
 
   loadInitialState() {
+    let st = null;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        st = JSON.parse(saved);
       }
     } catch (e) {
       console.warn('Failed to parse saved state, using default demo state', e);
     }
-    return JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+    if (!st) {
+      st = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+    }
+
+    // Auto-sync partner names across activeUser, transactions, and audit logs
+    if (st && st.partners && Array.isArray(st.partners)) {
+      const partnerMap = {};
+      for (const p of st.partners) {
+        partnerMap[p.id] = p.name;
+      }
+
+      // Sync activeUser
+      if (st.activeUser && partnerMap[st.activeUser.id]) {
+        st.activeUser.name = partnerMap[st.activeUser.id];
+      }
+
+      // Sync transactions
+      if (st.transactions && Array.isArray(st.transactions)) {
+        for (const tx of st.transactions) {
+          if (tx.holdingPartnerId && partnerMap[tx.holdingPartnerId]) {
+            tx.holdingPartnerName = partnerMap[tx.holdingPartnerId];
+          }
+          if (tx.fromPartnerId && partnerMap[tx.fromPartnerId]) {
+            tx.fromPartnerName = partnerMap[tx.fromPartnerId];
+          }
+          if (tx.toPartnerId && partnerMap[tx.toPartnerId]) {
+            tx.toPartnerName = partnerMap[tx.toPartnerId];
+          }
+        }
+      }
+    }
+
+    return st;
   }
 
   initServerSync() {
@@ -589,6 +622,9 @@ class StateStore {
           }
           if (tx.recordedBy === oldName) {
             tx.recordedBy = newName;
+          }
+          if (tx.lastEditedBy === oldName) {
+            tx.lastEditedBy = newName;
           }
         }
       }
