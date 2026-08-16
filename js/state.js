@@ -4,6 +4,7 @@
  */
 
 const STORAGE_KEY = 'somraas_store_inr_v1';
+const FIREBASE_DB_URL = 'https://somraas-a3f58-default-rtdb.firebaseio.com/somraas_cloud_store.json';
 
 const DEFAULT_INITIAL_STATE = {
   settings: {
@@ -394,45 +395,85 @@ class StateStore {
     return st;
   }
 
+  updateSyncBadge(status) {
+    const badge = document.getElementById('cloudSyncStatusBadge');
+    if (!badge) return;
+
+    if (status === 'online') {
+      badge.innerHTML = '<span style="font-size: 8px;">🟢</span> Cloud Synced (24/7 Live)';
+      badge.style.background = 'rgba(16, 185, 129, 0.15)';
+      badge.style.color = 'var(--color-success)';
+      badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+    } else if (status === 'syncing') {
+      badge.innerHTML = '<span style="font-size: 8px;">🔄</span> Syncing to Cloud...';
+      badge.style.background = 'rgba(59, 130, 246, 0.15)';
+      badge.style.color = 'var(--color-primary)';
+      badge.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+    } else {
+      badge.innerHTML = '<span style="font-size: 8px;">💾</span> Local Offline (Saved)';
+      badge.style.background = 'rgba(245, 158, 11, 0.15)';
+      badge.style.color = 'var(--color-warning)';
+      badge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+    }
+  }
+
   initServerSync() {
     if (typeof window === 'undefined' || !window.fetch) return;
 
-    fetch('/api/data')
+    // 1. Initial Cloud Sync from Firebase Realtime Database
+    fetch(FIREBASE_DB_URL)
       .then(res => res.json())
-      .then(serverData => {
-        if (serverData && serverData.partners && serverData.transactions) {
+      .then(cloudData => {
+        if (cloudData && Array.isArray(cloudData.partners) && Array.isArray(cloudData.products)) {
           const currentActiveUser = this.state.activeUser;
-          this.state = serverData;
+          this.state = cloudData;
           if (!this.state.auditLogs) this.state.auditLogs = [];
           if (!this.state.expenseCategories) this.state.expenseCategories = DEFAULT_INITIAL_STATE.expenseCategories;
           if (currentActiveUser) this.state.activeUser = currentActiveUser;
           try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); } catch (e) {}
           this.notify();
+          this.updateSyncBadge('online');
         } else {
+          // Cloud database is empty, seed it with current initial state
           this.syncToServer();
         }
       })
-      .catch(() => {});
+      .catch(err => {
+        console.warn('Firebase initial sync fallback to local storage:', err);
+        this.updateSyncBadge('local');
+      });
 
+    // 2. Realtime 2-Way Live Streaming EventSource (Like Google Docs)
     if (typeof EventSource !== 'undefined') {
       try {
-        const eventSource = new EventSource('/api/events');
-        eventSource.addEventListener('data_update', (e) => {
+        const eventSource = new EventSource(FIREBASE_DB_URL);
+
+        eventSource.addEventListener('put', (e) => {
           if (this.isSyncing) return;
           try {
-            const updatedData = JSON.parse(e.data);
-            if (updatedData && updatedData.partners) {
+            const payload = JSON.parse(e.data);
+            if (payload && payload.data && Array.isArray(payload.data.partners) && Array.isArray(payload.data.products)) {
               const currentActiveUser = this.state.activeUser;
-              this.state = updatedData;
+              this.state = payload.data;
+              if (!this.state.auditLogs) this.state.auditLogs = [];
               if (currentActiveUser) this.state.activeUser = currentActiveUser;
               try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); } catch (err) {}
               this.notify();
+              this.updateSyncBadge('online');
               if (window.UI && window.UI.showToast) {
-                window.UI.showToast('⚡ Real-time update synced from partner!', 'info', 2500);
+                window.UI.showToast('⚡ Live update synced across devices!', 'info', 2000);
               }
             }
           } catch (err) {}
         });
+
+        eventSource.onopen = () => {
+          this.updateSyncBadge('online');
+        };
+
+        eventSource.onerror = () => {
+          this.updateSyncBadge('local');
+        };
       } catch (e) {}
     }
   }
@@ -440,15 +481,31 @@ class StateStore {
   syncToServer() {
     if (typeof window === 'undefined' || !window.fetch) return;
     this.isSyncing = true;
+    this.updateSyncBadge('syncing');
+
+    // Save to Google Firebase Cloud Database (Worldwide 24/7 sync)
+    fetch(FIREBASE_DB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(this.state)
+    })
+    .then(() => {
+      this.updateSyncBadge('online');
+    })
+    .catch(err => {
+      console.warn('Firebase cloud sync save error:', err);
+      this.updateSyncBadge('local');
+    })
+    .finally(() => {
+      setTimeout(() => { this.isSyncing = false; }, 300);
+    });
+
+    // Also sync to local backend if running locally
     fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(this.state)
-    })
-    .catch(() => {})
-    .finally(() => {
-      setTimeout(() => { this.isSyncing = false; }, 300);
-    });
+    }).catch(() => {});
   }
 
   saveState() {
