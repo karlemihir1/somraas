@@ -551,10 +551,49 @@ class StateStore {
     const idx = this.state.partners.findIndex(p => p.id === partnerId);
     if (idx !== -1) {
       const oldPartner = this.state.partners[idx];
+      const oldName = oldPartner.name;
+      const newName = updatedData.name ? updatedData.name.trim() : oldName;
+
       if (updatedData.profitShareRatio !== undefined) updatedData.profitShareRatio = Number(updatedData.profitShareRatio) || 0;
       if (updatedData.initialCapital !== undefined) updatedData.initialCapital = Number(updatedData.initialCapital) || 0;
-      this.state.partners[idx] = { ...this.state.partners[idx], ...updatedData };
-      this.logActivity('PARTNER EDITED', `Edited partner "${oldPartner.name}": Equity Ratio: ${updatedData.profitShareRatio ?? oldPartner.profitShareRatio}%`);
+      
+      this.state.partners[idx] = { 
+        ...this.state.partners[idx], 
+        ...updatedData, 
+        name: newName,
+        avatar: (newName || 'P')[0].toUpperCase()
+      };
+
+      // 1. Sync Active User if current active user is this partner
+      if (this.state.activeUser && (this.state.activeUser.id === partnerId || this.state.activeUser.name === oldName)) {
+        this.state.activeUser.id = partnerId;
+        this.state.activeUser.name = newName;
+        this.state.activeUser.role = updatedData.role || this.state.activeUser.role;
+        this.state.activeUser.avatar = newName[0].toUpperCase();
+      }
+
+      // 2. Sync existing transactions associated with this partner
+      if (this.state.transactions && Array.isArray(this.state.transactions)) {
+        for (const tx of this.state.transactions) {
+          if (tx.holdingPartnerId === partnerId) {
+            tx.holdingPartnerName = newName;
+          }
+          if (tx.partnerId === partnerId) {
+            tx.partnerName = newName;
+          }
+          if (tx.fromPartnerId === partnerId) {
+            tx.fromPartnerName = newName;
+          }
+          if (tx.toPartnerId === partnerId) {
+            tx.toPartnerName = newName;
+          }
+          if (tx.recordedBy === oldName) {
+            tx.recordedBy = newName;
+          }
+        }
+      }
+
+      this.logActivity('PARTNER EDITED', `Renamed partner "${oldName}" → "${newName}" (Role: ${this.state.partners[idx].role}, Equity: ${this.state.partners[idx].profitShareRatio}%)`);
       this.saveState();
       return this.state.partners[idx];
     }

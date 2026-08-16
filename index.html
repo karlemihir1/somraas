@@ -375,13 +375,25 @@
             </button>
           </div>
 
+          <!-- Storage Location Breakdown Summary Cards -->
+          <div id="inventoryLocationWidget" style="margin-bottom: 20px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <span>📍</span> Stock Available by Storage Location
+            </div>
+            <div id="stockLocationBreakdown" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+          </div>
+
           <div class="toolbar-controls">
             <div class="search-input-group">
               <span class="search-icon">🔍</span>
-              <input type="text" id="inventorySearch" placeholder="Search by product name, SKU, or category...">
+              <input type="text" id="inventorySearch" placeholder="Search by product name, SKU, or location...">
             </div>
 
             <div class="filter-group">
+              <select id="inventoryLocationFilter" class="filter-select">
+                <option value="ALL">📍 All Locations</option>
+              </select>
+
               <select id="inventoryCategoryFilter" class="filter-select">
                 <option value="ALL">All Categories</option>
               </select>

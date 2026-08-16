@@ -5,6 +5,7 @@
 
 const InventoryModule = {
   selectedCategory: 'ALL',
+  selectedLocation: 'ALL',
   searchQuery: '',
 
   init() {
@@ -16,6 +17,14 @@ const InventoryModule = {
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         this.searchQuery = e.target.value.toLowerCase().trim();
+        this.render();
+      });
+    }
+
+    const locSelect = document.getElementById('inventoryLocationFilter');
+    if (locSelect) {
+      locSelect.addEventListener('change', (e) => {
+        this.selectedLocation = e.target.value;
         this.render();
       });
     }
@@ -59,17 +68,20 @@ const InventoryModule = {
     const tbody = document.getElementById('inventoryTableBody');
     if (!tbody) return;
 
+    this.renderLocationBreakdown(products);
+    this.updateLocationOptions(products);
+    this.updateCategoryOptions(products);
+
     const filtered = products.filter(prod => {
       const matchesCategory = this.selectedCategory === 'ALL' || prod.category === this.selectedCategory;
+      const matchesLocation = this.selectedLocation === 'ALL' || (prod.location || 'Main Storage') === this.selectedLocation;
       const matchesSearch = !this.searchQuery || 
         prod.name.toLowerCase().includes(this.searchQuery) ||
         (prod.sku && prod.sku.toLowerCase().includes(this.searchQuery)) ||
         (prod.location && prod.location.toLowerCase().includes(this.searchQuery)) ||
         (prod.category && prod.category.toLowerCase().includes(this.searchQuery));
-      return matchesCategory && matchesSearch;
+      return matchesCategory && matchesLocation && matchesSearch;
     });
-
-    this.updateCategoryOptions(products);
 
     if (filtered.length === 0) {
       tbody.innerHTML = `
@@ -145,6 +157,81 @@ const InventoryModule = {
         </tr>
       `;
     }).join('');
+  },
+
+  renderLocationBreakdown(products) {
+    const container = document.getElementById('stockLocationBreakdown');
+    if (!container) return;
+
+    const locMap = {};
+    let grandTotalUnits = 0;
+    let grandTotalValuation = 0;
+
+    for (const prod of products) {
+      const loc = prod.location || 'Main Storage';
+      const stock = Number(prod.stock) || 0;
+      const cost = Number(prod.costPrice) || 0;
+      const val = stock * cost;
+
+      if (!locMap[loc]) {
+        locMap[loc] = { name: loc, units: 0, valuation: 0, itemsCount: 0, items: [] };
+      }
+      locMap[loc].units += stock;
+      locMap[loc].valuation += val;
+      locMap[loc].itemsCount += 1;
+      locMap[loc].items.push({ name: prod.name, stock, unit: prod.unit || 'pcs' });
+
+      grandTotalUnits += stock;
+      grandTotalValuation += val;
+    }
+
+    const locations = Object.values(locMap);
+
+    let html = `
+      <div onclick="InventoryModule.filterByLocation('ALL')" 
+           style="cursor: pointer; background: ${this.selectedLocation === 'ALL' ? 'rgba(59, 130, 246, 0.18)' : 'var(--bg-surface-elevated)'}; border: 1px solid ${this.selectedLocation === 'ALL' ? 'var(--color-primary)' : 'var(--border-subtle)'}; padding: 8px 14px; border-radius: var(--radius-md); transition: all 0.2s ease;">
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">All Storage Locations</div>
+        <div style="font-size: 14px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">
+          ${grandTotalUnits} units <span style="font-size: 11.5px; font-weight: 600; color: var(--color-purple);">(${window.UI.formatCurrency(grandTotalValuation)})</span>
+        </div>
+      </div>
+    `;
+
+    for (const loc of locations) {
+      const isSelected = this.selectedLocation === loc.name;
+      html += `
+        <div onclick="InventoryModule.filterByLocation('${loc.name.replace(/'/g, "\\'")}')" 
+             style="cursor: pointer; background: ${isSelected ? 'rgba(59, 130, 246, 0.18)' : 'var(--bg-surface-elevated)'}; border: 1px solid ${isSelected ? 'var(--color-primary)' : 'var(--border-subtle)'}; padding: 8px 14px; border-radius: var(--radius-md); transition: all 0.2s ease;">
+          <div style="font-size: 11px; color: ${isSelected ? 'var(--color-primary)' : 'var(--text-secondary)'}; font-weight: 700;">📍 ${loc.name}</div>
+          <div style="font-size: 14px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">
+            ${loc.units} units <span style="font-size: 11.5px; font-weight: 600; color: var(--color-purple);">(${window.UI.formatCurrency(loc.valuation)})</span>
+          </div>
+          <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 1px;">
+            ${loc.itemsCount} product ${loc.itemsCount === 1 ? 'type' : 'types'}
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  },
+
+  filterByLocation(locName) {
+    this.selectedLocation = locName;
+    const locSelect = document.getElementById('inventoryLocationFilter');
+    if (locSelect) locSelect.value = locName;
+    this.render();
+  },
+
+  updateLocationOptions(products) {
+    const locSelect = document.getElementById('inventoryLocationFilter');
+    if (!locSelect) return;
+
+    const locations = Array.from(new Set(products.map(p => p.location || 'Main Storage'))).sort();
+    const currentVal = this.selectedLocation;
+
+    locSelect.innerHTML = `<option value="ALL">📍 All Locations (${products.length} products)</option>` +
+      locations.map(l => `<option value="${l}" ${l === currentVal ? 'selected' : ''}>📍 ${l}</option>`).join('');
   },
 
   updateCategoryOptions(products) {
