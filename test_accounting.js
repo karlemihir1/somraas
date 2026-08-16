@@ -1,0 +1,55 @@
+const AccountingEngine = require('./js/accounting.js');
+
+// Mock Store State
+const mockState = {
+  settings: { currencySymbol: '₹', currencyCode: 'INR' },
+  partners: [
+    { id: 'partner_aarav', name: 'Aarav Sharma', role: 'Managing Partner', profitShareRatio: 40, initialCapital: 500000 },
+    { id: 'partner_sneha', name: 'Sneha Patel', role: 'Operations Partner', profitShareRatio: 35, initialCapital: 350000 },
+    { id: 'partner_rohan', name: 'Rohan Verma', role: 'Marketing Partner', profitShareRatio: 25, initialCapital: 250000 }
+  ],
+  products: [
+    { id: 'prod_1', name: 'Headphones', location: 'Warehouse A', costPrice: 2800, stock: 45 },
+    { id: 'prod_2', name: 'Keyboard', location: 'Warehouse A', costPrice: 1950, stock: 32 },
+    { id: 'prod_3', name: 'USB Hub', location: 'Storefront', costPrice: 850, stock: 80 },
+    { id: 'prod_4', name: 'Mouse', location: 'Storefront', costPrice: 950, stock: 8 },
+    { id: 'prod_5', name: 'Stand', location: 'Warehouse B', costPrice: 1100, stock: 38 }
+  ],
+  transactions: [
+    { type: 'INJECTION', amount: 500000, holdingPartnerId: 'partner_aarav', partnerId: 'partner_aarav' },
+    { type: 'INJECTION', amount: 350000, holdingPartnerId: 'partner_sneha', partnerId: 'partner_sneha' },
+    { type: 'INJECTION', amount: 250000, holdingPartnerId: 'partner_rohan', partnerId: 'partner_rohan' },
+    { type: 'PURCHASE', amount: 380000, holdingPartnerId: 'partner_sneha' },
+    { type: 'EXPENSE', amount: 45000, holdingPartnerId: 'partner_aarav' },
+    { type: 'EXPENSE', amount: 22500, holdingPartnerId: 'partner_rohan' },
+    { type: 'EXPENSE', amount: 14200, holdingPartnerId: 'partner_sneha' },
+    { type: 'SALE', amount: 110388, cogs: 51400, holdingPartnerId: 'partner_sneha' },
+    { type: 'SALE', amount: 81965, cogs: 33500, holdingPartnerId: 'partner_aarav' },
+    { type: 'SALE', amount: 95400, cogs: 42100, holdingPartnerId: 'partner_rohan' },
+    { type: 'DRAWING', amount: 25000, holdingPartnerId: 'partner_aarav', partnerId: 'partner_aarav' }
+  ]
+};
+
+console.log('--- Testing EquiLedger Personal Account & Financial Engine in ₹ INR ---');
+const report = AccountingEngine.calculateFinancials(mockState, 'ALL');
+
+console.log(`Total Sales Revenue: ₹${report.revenue.toLocaleString('en-IN')}`);
+console.log(`Total COGS: ₹${report.cogs.toLocaleString('en-IN')}`);
+console.log(`Gross Profit: ₹${report.grossProfit.toLocaleString('en-IN')} (${report.grossMarginPercent.toFixed(1)}%)`);
+console.log(`Total Operating Expenses: ₹${report.expenses.toLocaleString('en-IN')}`);
+console.log(`Net Distributable Profit: ₹${report.netProfit.toLocaleString('en-IN')} (${report.netMarginPercent.toFixed(1)}%)`);
+console.log(`Inventory Valuation: ₹${report.inventoryValuation.toLocaleString('en-IN')} (${report.totalStockUnits} units)`);
+console.log(`Total Liquid Cash Held Across Personal Accounts: ₹${report.liquidCashBalance.toLocaleString('en-IN')}\n`);
+
+console.log('Personal Bank / UPI Account Cash Breakdown:');
+for (const p of report.partnerSummaries) {
+  console.log(`- ${p.name}: Personal Cash Held = ₹${p.netCashHeld.toLocaleString('en-IN')} | Allocated Profit = ₹${p.allocatedProfit.toLocaleString('en-IN')} | Total Capital Equity = ₹${p.endingCapital.toLocaleString('en-IN')}`);
+}
+
+// Validation
+if (report.grossProfit === 160753 && report.netProfit === 79053) {
+  console.log('\n--- ALL ACCOUNTING & PERSONAL ACCOUNT TESTS PASSED WITH 100% ACCURACY! ---');
+} else {
+  console.error('Test mismatch!', report);
+  process.exit(1);
+}

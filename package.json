@@ -1,0 +1,22 @@
+{
+  "name": "somraas",
+  "version": "1.0.0",
+  "description": "Somraas - Multi-Partner Accounting, Stock & Personal Account Settlement Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test_accounting.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "accounting",
+    "inventory",
+    "somraas",
+    "partner-settlement",
+    "profit-sharing"
+  ],
+  "author": "Somraas Team",
+  "license": "MIT"
+}

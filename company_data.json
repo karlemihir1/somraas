@@ -1,0 +1,293 @@
+{
+  "settings": {
+    "businessName": "Apex Trade Partners",
+    "currencySymbol": "₹",
+    "currencyCode": "INR",
+    "taxRatePercent": 0
+  },
+  "expenseCategories": [
+    "Rent & Warehouse",
+    "Salaries & Staff Wages",
+    "Electricity & Utilities",
+    "Marketing & Online Ads",
+    "Logistics & Courier Shipping",
+    "Software & SaaS Tools",
+    "CA, Legal & Accounting Fees",
+    "Repairs & Maintenance",
+    "Tea, Food & Hospitality",
+    "Packaging & Raw Materials",
+    "Miscellaneous Expenses"
+  ],
+  "activeUser": {
+    "id": "partner_aarav",
+    "name": "Aarav Sharma",
+    "role": "Managing Partner",
+    "avatar": "A"
+  },
+  "partners": [
+    {
+      "name": "Mihir Karle",
+      "role": "Partner",
+      "email": "",
+      "profitShareRatio": 33.4,
+      "initialCapital": 0,
+      "avatar": "M",
+      "id": "partner_1786862990178",
+      "createdAt": "2026-08-16"
+    },
+    {
+      "name": "Varun",
+      "role": "Partner",
+      "email": "",
+      "profitShareRatio": 33.3,
+      "initialCapital": 0,
+      "avatar": "V",
+      "id": "partner_1786863003188",
+      "createdAt": "2026-08-16"
+    },
+    {
+      "name": "Vaishali",
+      "role": "Partner",
+      "email": "",
+      "profitShareRatio": 33.3,
+      "initialCapital": 0,
+      "avatar": "V",
+      "id": "partner_1786863026649",
+      "createdAt": "2026-08-16"
+    }
+  ],
+  "products": [
+    {
+      "sku": "SKU-2477",
+      "name": "Ballentine",
+      "category": "General",
+      "location": "Varun",
+      "unit": "pcs",
+      "costPrice": 1125,
+      "sellingPrice": 0,
+      "stock": 3,
+      "minThreshold": 5,
+      "id": "prod_1786864002477",
+      "createdAt": "2026-08-16"
+    },
+    {
+      "sku": "SKU-3028",
+      "name": "Ranthambore",
+      "category": "General",
+      "location": "Varun",
+      "unit": "pcs",
+      "costPrice": 1630,
+      "sellingPrice": 0,
+      "stock": 1,
+      "minThreshold": 5,
+      "id": "prod_1786864083029",
+      "createdAt": "2026-08-16"
+    },
+    {
+      "sku": "SKU-8340",
+      "name": "Jim Beam",
+      "category": "General",
+      "location": "Car",
+      "unit": "pcs",
+      "costPrice": 1670,
+      "sellingPrice": 0,
+      "stock": 1,
+      "minThreshold": 5,
+      "id": "prod_1786864158340",
+      "createdAt": "2026-08-16"
+    }
+  ],
+  "transactions": [],
+  "auditLogs": [
+    {
+      "id": "log_1786864158341_fh3i",
+      "timestamp": "16 Aug 2026 12:39 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM CREATED",
+      "details": "Added product \"Jim Beam\" at location \"Car\" (Stock: 1 pcs)"
+    },
+    {
+      "id": "log_1786864083029_oidq",
+      "timestamp": "16 Aug 2026 12:38 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM CREATED",
+      "details": "Added product \"Ranthambore\" at location \"Varun\" (Stock: 1 pcs)"
+    },
+    {
+      "id": "log_1786864002481_4zxa",
+      "timestamp": "16 Aug 2026 12:36 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM CREATED",
+      "details": "Added product \"Ballentine\" at location \"Varun\" (Stock: 3 pcs)"
+    },
+    {
+      "id": "log_1786863119960_4yy4",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED DRAWING",
+      "details": "Voided/deleted transaction tx_draw_1: Interim Profit Drawing by Aarav (₹25,000)"
+    },
+    {
+      "id": "log_1786863116669_v2z4",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED SALE",
+      "details": "Voided/deleted transaction tx_sale_3: Direct D2C Online Store Sales Batch (₹95,400)"
+    },
+    {
+      "id": "log_1786863114139_b1o2",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED SALE",
+      "details": "Voided/deleted transaction tx_sale_2: Order: 20x USB Hubs, 15x Laptop Stands (₹81,965)"
+    },
+    {
+      "id": "log_1786863111652_mb3q",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED SALE",
+      "details": "Voided/deleted transaction tx_sale_1: Corporate order: 10x Headphones, 12x Keyboards (₹1,10,388)"
+    },
+    {
+      "id": "log_1786863108831_kztn",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED EXPENSE",
+      "details": "Voided/deleted transaction tx_exp_3: Courier shipments, packaging materials & shipping credits (₹14,200)"
+    },
+    {
+      "id": "log_1786863106101_zn35",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED EXPENSE",
+      "details": "Voided/deleted transaction tx_exp_2: Google Ads & Digital Performance Marketing (₹22,500)"
+    },
+    {
+      "id": "log_1786863103622_k4zt",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED EXPENSE",
+      "details": "Voided/deleted transaction tx_exp_1: Q1 Commercial Warehouse & Office Rent (₹45,000)"
+    },
+    {
+      "id": "log_1786863101035_5y2l",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED PURCHASE",
+      "details": "Voided/deleted transaction tx_restock_1: Bulk opening batch: Headphones, Keyboards, Hubs, Laptop Stands (₹3,80,000)"
+    },
+    {
+      "id": "log_1786863098468_y1zm",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED INJECTION",
+      "details": "Voided/deleted transaction tx_init_3: Initial Equity Contribution by Rohan (₹2,50,000)"
+    },
+    {
+      "id": "log_1786863092593_sez6",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED INJECTION",
+      "details": "Voided/deleted transaction tx_init_2: Initial Equity Contribution by Sneha (₹3,50,000)"
+    },
+    {
+      "id": "log_1786863085163_7s0w",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "DELETED INJECTION",
+      "details": "Voided/deleted transaction tx_init_1: Initial Equity Contribution by Aarav (₹5,00,000)"
+    },
+    {
+      "id": "log_1786863072372_rqt0",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM DELETED",
+      "details": "Removed product \"Adjustable Aluminum Laptop Stand\" from catalog"
+    },
+    {
+      "id": "log_1786863068898_u54r",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM DELETED",
+      "details": "Removed product \"Ergonomic Wireless Vertical Mouse\" from catalog"
+    },
+    {
+      "id": "log_1786863065551_jcac",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM DELETED",
+      "details": "Removed product \"USB-C Fast Charging Multi-Hub (100W)\" from catalog"
+    },
+    {
+      "id": "log_1786863062812_f6fj",
+      "timestamp": "16 Aug 2026 12:21 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM DELETED",
+      "details": "Removed product \"Ultra-Slim Mechanical RGB Keyboard\" from catalog"
+    },
+    {
+      "id": "log_1786863053660_lzi5",
+      "timestamp": "16 Aug 2026 12:20 pm",
+      "user": "Aarav Sharma",
+      "action": "ITEM DELETED",
+      "details": "Removed product \"Noise-Canceling Pro Headphones\" from catalog"
+    },
+    {
+      "id": "log_1786863026649_vctq",
+      "timestamp": "16 Aug 2026 12:20 pm",
+      "user": "Aarav Sharma",
+      "action": "PARTNER ADDED",
+      "details": "Registered new partner \"Vaishali\" with 33.3% equity"
+    },
+    {
+      "id": "log_1786863012006_uxgl",
+      "timestamp": "16 Aug 2026 12:20 pm",
+      "user": "Aarav Sharma",
+      "action": "PARTNER REMOVED",
+      "details": "Removed partner \"Rohan Verma\""
+    },
+    {
+      "id": "log_1786863003188_8e26",
+      "timestamp": "16 Aug 2026 12:20 pm",
+      "user": "Aarav Sharma",
+      "action": "PARTNER ADDED",
+      "details": "Registered new partner \"Varun\" with 33.3% equity"
+    },
+    {
+      "id": "log_1786862990178_pc3m",
+      "timestamp": "16 Aug 2026 12:19 pm",
+      "user": "Aarav Sharma",
+      "action": "PARTNER ADDED",
+      "details": "Registered new partner \"Mihir Karle\" with 33.4% equity"
+    },
+    {
+      "id": "log_1786862970564_m9jx",
+      "timestamp": "16 Aug 2026 12:19 pm",
+      "user": "Aarav Sharma",
+      "action": "PARTNER REMOVED",
+      "details": "Removed partner \"Sneha Patel\""
+    },
+    {
+      "id": "log_1786862967243_xl6z",
+      "timestamp": "16 Aug 2026 12:19 pm",
+      "user": "Aarav Sharma",
+      "action": "PARTNER REMOVED",
+      "details": "Removed partner \"Aarav Sharma\""
+    },
+    {
+      "id": "log_1786862915549_0rdn",
+      "timestamp": "16 Aug 2026 12:18 pm",
+      "user": "Aarav Sharma",
+      "action": "EQUITY SPLIT ADJUSTED",
+      "details": "Updated partner equity ratios: Aarav Sharma: 40% → 33.4%, Sneha Patel: 35% → 33.3%, Rohan Verma: 25% → 33.3%"
+    },
+    {
+      "id": "log_init_1",
+      "timestamp": "2026-02-14 10:30 AM",
+      "user": "Aarav Sharma",
+      "action": "SYSTEM INITIALIZED",
+      "details": "Initial system setup with 3 partners and opening inventory catalog."
+    }
+  ],
+  "selectedPeriod": "ALL"
+}

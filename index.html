@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Somraas | Multi-Partner Accounting & Inventory (₹ INR)</title>
+  <meta name="description" content="Somraas - Streamlined multi-partner accounting system for inventory tracking, instant transaction entries, personal bank/UPI account tracking, and automatic profit distribution in Indian Rupees (₹).">
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Sticky Header -->
+    <header class="top-header">
+      <div class="header-inner">
+        <!-- Brand -->
+        <div class="brand-section">
+          <div class="brand-logo">₹</div>
+          <div class="brand-title-group">
+            <h1>
+              Somraas
+              <span class="brand-tag">₹ INR</span>
+            </h1>
+            <div class="brand-subtitle">Partner Accounting, Stock & Profit Distribution Platform</div>
+          </div>
+        </div>
+
+        <!-- Header Actions & Fast Entry -->
+        <div class="header-actions">
+          <!-- Active User Profile Switcher -->
+          <div class="user-selector-wrapper" title="Switch active partner / user recording entries">
+            <div class="user-badge-icon" id="activeUserAvatar">A</div>
+            <div>
+              <label>Active User</label>
+              <select id="activeUserSelect" class="user-selector"></select>
+            </div>
+          </div>
+
+          <!-- Time Period Selector -->
+          <div class="period-selector-wrapper" title="Filter financial statements by date range">
+            <span style="color: var(--text-muted); font-size: 13px;">📅</span>
+            <select id="periodSelect" class="period-select">
+              <option value="ALL">All Time</option>
+              <option value="YEAR">This FY (2026)</option>
+              <option value="QUARTER">This Quarter</option>
+              <option value="MONTH">This Month</option>
+              <option value="WEEK">Last 7 Days</option>
+              <option value="TODAY">Today</option>
+            </select>
+          </div>
+
+          <!-- Fast Entry Action Buttons -->
+          <div class="quick-btn-group">
+            <button class="btn btn-success" onclick="TransactionsModule.openSaleModal()" title="Record a new customer sale">
+              <span>+</span> Sale
+            </button>
+            <button class="btn btn-primary" onclick="TransactionsModule.openRestockModal()" title="Restock inventory from supplier">
+              <span>+</span> Restock
+            </button>
+            <button class="btn btn-danger" onclick="TransactionsModule.openExpenseModal()" title="Record business operating expense">
+              <span>+</span> Expense
+            </button>
+            <button class="btn btn-purple" onclick="TransactionsModule.openPartnerTransferModal()" title="Transfer / settle money between personal accounts">
+              <span>💸</span> Settle Transfer
+            </button>
+            <button class="btn btn-secondary" onclick="UI.openModal('shareModal')" title="Share live link with partner" style="border-color: var(--color-primary); color: var(--color-primary);">
+              <span>🔗</span> Share Link
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Sub-header -->
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <a class="nav-tab active" data-tab="dashboardTab">
+          <span>📊</span> Dashboard & Overview
+        </a>
+        <a class="nav-tab" data-tab="transactionsTab">
+          <span>📋</span> Transactions Ledger
+          <span class="nav-badge" id="navTxBadge">0</span>
+        </a>
+        <a class="nav-tab" data-tab="inventoryTab">
+          <span>📦</span> Products & Stock
+          <span class="nav-badge" id="navInventoryBadge">0</span>
+        </a>
+        <a class="nav-tab" data-tab="partnersTab">
+          <span>👥</span> Partner Equity & Split
+          <span class="nav-badge" id="navPartnerBadge">0</span>
+        </a>
+        <a class="nav-tab" data-tab="reportsTab">
+          <span>📈</span> Financial P&L
+        </a>
+        <a class="nav-tab" data-tab="auditTab">
+          <span>📝</span> Activity & Edit Log
+        </a>
+        <a class="nav-tab" data-tab="settingsTab" style="margin-left: auto;">
+          <span>⚙️</span> Settings & Categories
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+
+      <!-- =========================================================
+           TAB 1: DASHBOARD & OVERVIEW
+           ========================================================= -->
+      <section id="dashboardTab" class="tab-view active">
+        
+        <!-- High Visibility Executive Summary Banner (Dashboard Only) -->
+        <section class="summary-banner">
+          <div class="summary-header-row">
+            <div class="section-title">
+              <span>⚡</span> Business Financial Performance Summary (₹ INR)
+            </div>
+          </div>
+
+          <div class="summary-grid">
+            <!-- Gross Revenue -->
+            <div class="kpi-card revenue">
+              <div class="kpi-top">
+                <span class="kpi-label">Sales Revenue</span>
+                <div class="kpi-icon-pill">₹</div>
+              </div>
+              <div class="kpi-value" id="kpiRevenue">₹0.00</div>
+              <div class="kpi-sub">Total sales generated</div>
+            </div>
+
+            <!-- COGS -->
+            <div class="kpi-card cogs">
+              <div class="kpi-top">
+                <span class="kpi-label">Cost of Goods (COGS)</span>
+                <div class="kpi-icon-pill">📉</div>
+              </div>
+              <div class="kpi-value" id="kpiCOGS">₹0.00</div>
+              <div class="kpi-sub">Inventory product cost</div>
+            </div>
+
+            <!-- Gross Profit -->
+            <div class="kpi-card gross-profit">
+              <div class="kpi-top">
+                <span class="kpi-label">Gross Profit</span>
+                <div class="kpi-icon-pill">📈</div>
+              </div>
+              <div class="kpi-value" id="kpiGrossProfit">₹0.00</div>
+              <div class="kpi-sub" id="kpiGrossMargin">0.0% gross margin</div>
+            </div>
+
+            <!-- Expenses -->
+            <div class="kpi-card expenses">
+              <div class="kpi-top">
+                <span class="kpi-label">Operating Expenses</span>
+                <div class="kpi-icon-pill">💸</div>
+              </div>
+              <div class="kpi-value" id="kpiExpenses">₹0.00</div>
+              <div class="kpi-sub">Rent, Salaries, Logistics, etc.</div>
+            </div>
+
+            <!-- Net Distributable Profit -->
+            <div class="kpi-card net-profit" id="kpiNetProfitCard">
+              <div class="kpi-top">
+                <span class="kpi-label">Net Partner Profit</span>
+                <div class="kpi-icon-pill">🏆</div>
+              </div>
+              <div class="kpi-value" id="kpiNetProfit">₹0.00</div>
+              <div class="kpi-sub" id="kpiNetMargin">0.0% net margin</div>
+            </div>
+
+            <!-- Inventory Asset Valuation -->
+            <div class="kpi-card inventory-value">
+              <div class="kpi-top">
+                <span class="kpi-label">Inventory Asset Value</span>
+                <div class="kpi-icon-pill">📦</div>
+              </div>
+              <div class="kpi-value" id="kpiInventoryVal">₹0.00</div>
+              <div class="kpi-sub" id="kpiInventoryUnits">0 units in stock</div>
+            </div>
+
+            <!-- Cash & Bank Balance -->
+            <div class="kpi-card cash-balance">
+              <div class="kpi-top">
+                <span class="kpi-label">Liquid Cash Balance</span>
+                <div class="kpi-icon-pill">🏦</div>
+              </div>
+              <div class="kpi-value" id="kpiCashBalance">₹0.00</div>
+              <div class="kpi-sub">Bank & cash reserves</div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Partner Profit Matrix -->
+        <div class="partner-matrix-card">
+          <div class="partner-matrix-header">
+            <div>
+              <h2 class="card-title">
+                <span>👥</span> Partner Equity & Live Profit Allocation Matrix
+              </h2>
+              <div style="font-size: 12.5px; color: var(--text-muted);">
+                Calculated dynamically from Net Business Profit according to agreed profit-sharing equity percentages.
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary btn-sm" onclick="UI.switchTab('settingsTab')">
+                ⚙️ Adjust Equity Split
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="PartnersModule.openAddModal()">
+                + Add Partner
+              </button>
+            </div>
+          </div>
+
+          <div class="partner-ratio-bar-wrapper">
+            <div class="partner-ratio-bar" id="partnerRatioBar"></div>
+            <div id="partnerRatioWarning" style="font-size: 12px; color: var(--color-warning); display: none; margin-top: 4px;"></div>
+          </div>
+
+          <div class="partner-cards-grid" id="dashboardPartnerCards"></div>
+        </div>
+
+        <div class="dashboard-columns">
+          
+          <!-- Left Column: Visual Financial Breakdown -->
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <span>📊</span> Financial Waterfall & Profitability
+              </h3>
+              <span style="font-size: 12px; color: var(--text-muted);">Revenue to Net Profit</span>
+            </div>
+            <div id="visualBreakdownChart"></div>
+
+            <div style="margin-top: 24px;">
+              <div class="card-header" style="margin-bottom: 10px;">
+                <h4 style="font-size: 13.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                  Recent Transactions
+                </h4>
+                <button class="btn btn-outline btn-xs" onclick="UI.switchTab('transactionsTab')">View All →</button>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th>Description</th>
+                      <th style="text-align: right;">Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardRecentTx"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Inventory Alerts & Fast Action -->
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <span>⚠️</span> Stock Status & Alerts
+              </h3>
+              <button class="btn btn-outline btn-xs" onclick="UI.switchTab('inventoryTab')">Full Catalog →</button>
+            </div>
+            
+            <div id="dashboardLowStockList"></div>
+
+            <div style="margin-top: 20px; background: var(--bg-surface-elevated); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <h4 style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                💡 Fast Action Entries
+              </h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button class="btn btn-success btn-sm" onclick="TransactionsModule.openSaleModal()">+ Customer Sale</button>
+                <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()">+ Restock Stock</button>
+                <button class="btn btn-danger btn-sm" onclick="TransactionsModule.openExpenseModal()">+ Add Expense</button>
+                <button class="btn btn-purple btn-sm" onclick="TransactionsModule.openPartnerTxModal('DRAWING')">- Partner Payout</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =========================================================
+           TAB 2: TRANSACTIONS LEDGER (100% EDITABLE)
+           ========================================================= -->
+      <section id="transactionsTab" class="tab-view">
+        <div class="content-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">
+                <span>📋</span> All Transactions Ledger & Entries
+              </h2>
+              <div style="font-size: 12.5px; color: var(--text-muted);">
+                Click <strong>✎ Edit</strong> on any row to modify sales, expenses, or restocks with live stock recalculation.
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-success btn-sm" onclick="TransactionsModule.openSaleModal()">+ Sale</button>
+              <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()">+ Restock</button>
+              <button class="btn btn-danger btn-sm" onclick="TransactionsModule.openExpenseModal()">+ Expense</button>
+              <button class="btn btn-purple btn-sm" onclick="TransactionsModule.openPartnerTxModal()">+ Partner Tx</button>
+            </div>
+          </div>
+
+          <!-- Controls Toolbar -->
+          <div class="toolbar-controls">
+            <div class="search-input-group">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="txSearch" placeholder="Search by customer, vendor, note, description...">
+            </div>
+
+            <div class="filter-group">
+              <select id="txTypeFilter" class="filter-select">
+                <option value="ALL">All Types</option>
+                <option value="SALE">Sales Only</option>
+                <option value="PURCHASE">Purchases / Restocks</option>
+                <option value="EXPENSE">Operating Expenses</option>
+                <option value="INJECTION">Partner Capital Injections</option>
+                <option value="DRAWING">Partner Drawings / Payouts</option>
+              </select>
+
+              <select id="txPartnerFilter" class="filter-select">
+                <option value="ALL">All Partners / Users</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Transactions Table -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date & Channel</th>
+                  <th>Type</th>
+                  <th>Description / Entity</th>
+                  <th>Recorded By</th>
+                  <th>Stock Delta</th>
+                  <th>Amount (₹)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 3: PRODUCTS & STOCK (100% EDITABLE)
+           ========================================================= -->
+      <section id="inventoryTab" class="tab-view">
+        <div class="content-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">
+                <span>📦</span> Products & Inventory Catalog
+              </h2>
+              <div style="font-size: 12.5px; color: var(--text-muted);">
+                Add or edit items to sell, adjust stock counts, update cost and retail selling prices.
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="InventoryModule.openAddModal()">
+              + Add Product
+            </button>
+          </div>
+
+          <div class="toolbar-controls">
+            <div class="search-input-group">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="inventorySearch" placeholder="Search by product name, SKU, or category...">
+            </div>
+
+            <div class="filter-group">
+              <select id="inventoryCategoryFilter" class="filter-select">
+                <option value="ALL">All Categories</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Storage Location</th>
+                  <th>Purchase Cost (₹)</th>
+                  <th>In Stock</th>
+                  <th>Stock Valuation (₹)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 4: PARTNERS & EQUITY
+           ========================================================= -->
+      <section id="partnersTab" class="tab-view">
+        <div class="content-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">
+                <span>👥</span> Partner Equity, Capital Accounts & Profit Split
+              </h2>
+              <div style="font-size: 12.5px; color: var(--text-muted);">
+                View running partner capital accounts, profit allocations, and drawings in Indian Rupees (₹).
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary btn-sm" onclick="UI.switchTab('settingsTab')">
+                ⚙️ Configure Split Ratios
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="PartnersModule.openAddModal()">
+                + Add Partner
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Partner Name</th>
+                  <th>Equity Share</th>
+                  <th>Personal A/C Cash (₹)</th>
+                  <th>Initial Capital</th>
+                  <th>Allocated Net Profit</th>
+                  <th>Drawings</th>
+                  <th>Total Capital Equity</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="partnersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 5: FINANCIAL REPORTS & P&L
+           ========================================================= -->
+      <section id="reportsTab" class="tab-view">
+        <div class="dashboard-columns">
+          <div id="incomeStatementContainer"></div>
+          <div>
+            <div id="balanceSheetContainer"></div>
+            <div class="statement-card">
+              <h3 style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">
+                💾 Data Backup & Restore
+              </h3>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;">
+                Export your company accounting records as a JSON backup or export transactions to CSV.
+              </p>
+              <input type="file" id="importFileInput" accept=".json" style="display: none;">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="ReportsModule.exportJsonBackup()">
+                    📥 Download Backup
+                  </button>
+                  <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="ReportsModule.triggerImport()">
+                    📤 Import Backup
+                  </button>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="ReportsModule.exportCsvTransactions()">
+                  📊 Export Transactions to CSV
+                </button>
+                <div style="display: flex; gap: 8px; margin-top: 8px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+                  <button class="btn btn-outline btn-xs" onclick="ReportsModule.resetDemoData()">
+                    🔄 Reload Demo Data
+                  </button>
+                  <button class="btn btn-outline btn-xs" style="color: var(--color-danger);" onclick="ReportsModule.clearAll()">
+                    ⚠️ Clear All Data
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 6: ACTIVITY & EDIT AUDIT LOG (NEW)
+           ========================================================= -->
+      <section id="auditTab" class="tab-view">
+        <div class="content-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">
+                <span>📝</span> User Edit Activity & Audit Trail
+              </h2>
+              <div style="font-size: 12.5px; color: var(--text-muted);">
+                Chronological list of all additions, modifications, and stock adjustments made by each user.
+              </div>
+            </div>
+          </div>
+
+          <div class="toolbar-controls">
+            <div class="filter-group">
+              <select id="auditUserFilter" class="filter-select">
+                <option value="ALL">All Users / Partners</option>
+              </select>
+              <select id="auditActionFilter" class="filter-select">
+                <option value="ALL">All Actions</option>
+                <option value="EDITS">Edits & Adjustments Only</option>
+                <option value="CREATIONS">New Creations Only</option>
+                <option value="DELETIONS">Deletions Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>User / Partner</th>
+                  <th>Action</th>
+                  <th>Details & Summary of Edit</th>
+                </tr>
+              </thead>
+              <tbody id="auditLogsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 7: SETTINGS & CUSTOM CATEGORIES
+           ========================================================= -->
+      <section id="settingsTab" class="tab-view">
+        <div class="dashboard-columns">
+          
+          <!-- Partner Equity & Profit Split Configuration -->
+          <div class="content-card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">
+                  <span>⚙️</span> Partner Equity & Profit-Sharing Configuration
+                </h2>
+                <div style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">
+                  Adjust each partner's profit-sharing ratio percentage using sliders or inputs.
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="PartnersModule.openAddModal()">
+                + Add Partner
+              </button>
+            </div>
+
+            <form id="batchRatioForm">
+              <div style="margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--bg-surface); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+                  <div>
+                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Allocated Ratio:</span>
+                    <span id="settingsTotalRatioDisplay" style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin-left: 8px;">100%</span>
+                  </div>
+                  <div id="settingsRatioStatusBadge" class="badge badge-sale">✓ Perfect (100%)</div>
+                </div>
+                <div id="settingsPartnerRatioRows"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="PartnersModule.autoSplitEqually()">
+                  ⚖️ Split Equally
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  💾 Save Equity Split Ratios
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Dynamic Expense Categories & Business Settings -->
+          <div>
+            <!-- Custom Expense Categories Manager -->
+            <div class="content-card" style="margin-bottom: 20px;">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">
+                    <span>🏷️</span> Editable Expense Categories
+                  </h3>
+                  <div style="font-size: 12px; color: var(--text-muted);">
+                    Add, rename, or delete categories in your Expense dropdown.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add Category Form -->
+              <form id="addCategoryForm" style="display: flex; gap: 8px; margin-bottom: 14px;">
+                <input type="text" id="newCategoryInput" class="form-control" placeholder="New category name (e.g. Petrol / Travel)..." required>
+                <button type="submit" class="btn btn-primary btn-sm">+ Add</button>
+              </form>
+
+              <!-- Category List -->
+              <div id="expenseCategoryManagerList" style="max-height: 260px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- Business Settings -->
+            <div class="content-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <span>🏢</span> Business Information
+                </h3>
+              </div>
+              <form id="generalSettingsForm">
+                <div class="form-group" style="margin-bottom: 14px;">
+                  <label>Business / Partnership Name</label>
+                  <input type="text" name="businessName" id="settingsBusinessName" class="form-control" value="Somraas" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                  <label>Currency</label>
+                  <input type="text" class="form-control" value="Indian Rupee (₹ INR)" readonly>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;">
+                  Save Business Details
+                </button>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- =========================================================
+       MODALS: ADD & EDIT WORKFLOWS
+       ========================================================= -->
+
+  <!-- 1. ADD SALE MODAL -->
+  <div id="saleModal" class="modal-backdrop">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Record Customer Sale</h3>
+          <div class="modal-subtitle">Automatically calculates revenue, COGS, gross profit in ₹, and decrements stock</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('saleModal')">✕</button>
+      </div>
+      <form id="saleForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Customer Name / Company</label>
+              <input type="text" name="customer" class="form-control" placeholder="e.g. Retail Client / Enterprise Ltd" required>
+            </div>
+            <div class="form-group">
+              <label>Sale Date</label>
+              <input type="date" name="date" id="saleDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Received In (Whose Personal Account / UPI?)</label>
+              <select name="holdingPartnerId" id="salePartnerAccountSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select name="paymentMethod" class="form-control">
+                <option value="UPI / QR Code">UPI / QR Code (GPay, PhonePe, Paytm)</option>
+                <option value="Bank Transfer (NEFT/RTGS/IMPS)">Bank Transfer (NEFT / RTGS / IMPS)</option>
+                <option value="Cash">Cash</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
+                <option value="Accounts Receivable">Accounts Receivable (Credit / Dues)</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label>Notes / Reference</label>
+              <input type="text" name="notes" class="form-control" placeholder="Order Ref or Invoice #">
+            </div>
+          </div>
+
+          <div style="margin-top: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Products to Sell</label>
+              <button type="button" class="btn btn-secondary btn-xs" onclick="TransactionsModule.addSaleLineItem()">+ Add Another Product</button>
+            </div>
+            <div id="saleLineItemsContainer" class="item-rows-container"></div>
+          </div>
+
+          <div id="saleSummaryBox" class="order-summary-box"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('saleModal')">Cancel</button>
+          <button type="submit" class="btn btn-success">Record Sale</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 1B. EDIT SALE MODAL -->
+  <div id="editSaleModal" class="modal-backdrop">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>✎ Edit Customer Sale</h3>
+          <div class="modal-subtitle">Modify line items, prices, or customer details. Stock is adjusted automatically.</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('editSaleModal')">✕</button>
+      </div>
+      <form id="editSaleForm">
+        <input type="hidden" name="id" id="editSaleTxId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Customer Name</label>
+              <input type="text" name="customer" id="editSaleCustomer" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Sale Date</label>
+              <input type="date" name="date" id="editSaleDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Received In (Whose Personal Account / UPI?)</label>
+              <select name="holdingPartnerId" id="editSalePartnerAccountSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select name="paymentMethod" id="editSalePaymentMethod" class="form-control">
+                <option value="UPI / QR Code">UPI / QR Code</option>
+                <option value="Bank Transfer (NEFT/RTGS/IMPS)">Bank Transfer (NEFT / RTGS / IMPS)</option>
+                <option value="Cash">Cash</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
+                <option value="Accounts Receivable">Accounts Receivable</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label>Notes / Reference</label>
+              <input type="text" name="notes" id="editSaleNotes" class="form-control">
+            </div>
+          </div>
+
+          <div style="margin-top: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Sale Line Items</label>
+              <button type="button" class="btn btn-secondary btn-xs" onclick="TransactionsModule.addEditSaleLineItem()">+ Add Product</button>
+            </div>
+            <div id="editSaleLineItemsContainer" class="item-rows-container"></div>
+          </div>
+
+          <div id="editSaleSummaryBox" class="order-summary-box"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editSaleModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. ADD RESTOCK MODAL -->
+  <div id="restockModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Restock Inventory / Purchase</h3>
+          <div class="modal-subtitle">Increases inventory quantity and records purchase cost in ₹</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('restockModal')">✕</button>
+      </div>
+      <form id="restockForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Select Product to Restock</label>
+              <select name="productId" id="restockProductSelect" class="form-control" onchange="TransactionsModule.onRestockProductChange(this.value)" required></select>
+            </div>
+            <div class="form-group">
+              <label>Supplier / Vendor</label>
+              <input type="text" name="vendor" class="form-control" placeholder="Vendor / Distributor name" required>
+            </div>
+            <div class="form-group">
+              <label>Paid From (Whose Personal Account / Pocket?)</label>
+              <select name="holdingPartnerId" id="restockPartnerAccountSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Restock Date</label>
+              <input type="date" name="date" id="restockDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Quantity Received (Units)</label>
+              <input type="number" name="quantity" id="restockQty" class="form-control" min="1" value="10" oninput="TransactionsModule.calculateRestockTotal()" required>
+            </div>
+            <div class="form-group">
+              <label>Unit Purchase Cost (₹)</label>
+              <input type="number" step="1" min="0" name="unitCost" id="restockUnitCost" class="form-control" oninput="TransactionsModule.calculateRestockTotal()" required>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select name="paymentMethod" class="form-control">
+                <option value="Personal Bank Transfer">Personal Bank Transfer (IMPS / NEFT)</option>
+                <option value="Personal UPI">Personal UPI (GPay / PhonePe)</option>
+                <option value="Personal Cash">Personal Cash</option>
+                <option value="Vendor Credit / Payables">Vendor Credit / Payables</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Notes</label>
+              <input type="text" name="notes" class="form-control" placeholder="PO # or Batch Ref">
+            </div>
+          </div>
+
+          <div class="order-summary-box">
+            <div class="order-summary-row total">
+              <span>Total Restock Outflow:</span>
+              <span id="restockTotalPreview" style="color: var(--color-danger);">₹0.00</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('restockModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Restock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2B. EDIT RESTOCK MODAL -->
+  <div id="editRestockModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>✎ Edit Restock Entry</h3>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('editRestockModal')">✕</button>
+      </div>
+      <form id="editRestockForm">
+        <input type="hidden" name="id" id="editRestockTxId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Product</label>
+              <select name="productId" id="editRestockProductSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Supplier / Vendor</label>
+              <input type="text" name="vendor" id="editRestockVendor" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Paid From (Whose Personal Account?)</label>
+              <select name="holdingPartnerId" id="editRestockPartnerAccountSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" name="date" id="editRestockDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Quantity Received</label>
+              <input type="number" name="quantity" id="editRestockQty" class="form-control" min="1" oninput="TransactionsModule.calculateEditRestockTotal()" required>
+            </div>
+            <div class="form-group">
+              <label>Unit Purchase Cost (₹)</label>
+              <input type="number" step="1" min="0" name="unitCost" id="editRestockUnitCost" class="form-control" oninput="TransactionsModule.calculateEditRestockTotal()" required>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select name="paymentMethod" id="editRestockPaymentMethod" class="form-control">
+                <option value="Personal Bank Transfer">Personal Bank Transfer</option>
+                <option value="Personal UPI">Personal UPI</option>
+                <option value="Personal Cash">Personal Cash</option>
+                <option value="Vendor Credit">Vendor Credit</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Notes</label>
+              <input type="text" name="notes" id="editRestockNotes" class="form-control">
+            </div>
+          </div>
+          <div class="order-summary-box">
+            <div class="order-summary-row total">
+              <span>Updated Total Outflow:</span>
+              <span id="editRestockTotalPreview" style="color: var(--color-danger);">₹0.00</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editRestockModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. ADD OPERATING EXPENSE MODAL -->
+  <div id="expenseModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Record Operating Expense</h3>
+          <div class="modal-subtitle">Directly impacts Net Business Profit</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('expenseModal')">✕</button>
+      </div>
+      <form id="expenseForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Expense Category</label>
+              <select name="category" id="expenseCategorySelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Amount (₹)</label>
+              <input type="number" step="1" min="1" name="amount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+              <label>Paid From (Whose Personal Account / Pocket?)</label>
+              <select name="holdingPartnerId" id="expensePartnerAccountSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Expense Date</label>
+              <input type="date" name="date" id="expenseDate" class="form-control" required>
+            </div>
+            <div class="form-group form-full">
+              <label>Expense Title / Description</label>
+              <input type="text" name="description" class="form-control" placeholder="e.g. Monthly Warehouse Rent" required>
+            </div>
+            <div class="form-group">
+              <label>Paid To (Payee)</label>
+              <input type="text" name="paidTo" class="form-control" placeholder="Vendor / Service provider name">
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select name="paymentMethod" class="form-control">
+                <option value="Personal UPI (GPay/PhonePe)">Personal UPI (GPay / PhonePe)</option>
+                <option value="Personal Bank Transfer">Personal Bank Transfer (NEFT/IMPS)</option>
+                <option value="Personal Cash">Personal Cash</option>
+                <option value="Personal Credit Card">Personal Credit Card</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label>Receipt / Memo</label>
+              <input type="text" name="notes" class="form-control" placeholder="Receipt # or Memo">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('expenseModal')">Cancel</button>
+          <button type="submit" class="btn btn-danger">Record Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3B. EDIT OPERATING EXPENSE MODAL -->
+  <div id="editExpenseModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>✎ Edit Operating Expense</h3>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('editExpenseModal')">✕</button>
+      </div>
+      <form id="editExpenseForm">
+        <input type="hidden" name="id" id="editExpenseTxId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Expense Category</label>
+              <select name="category" id="editExpenseCategorySelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Amount (₹)</label>
+              <input type="number" step="1" min="1" name="amount" id="editExpenseAmount" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Paid From (Whose Personal Account?)</label>
+              <select name="holdingPartnerId" id="editExpensePartnerAccountSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" name="date" id="editExpenseDate" class="form-control" required>
+            </div>
+            <div class="form-group form-full">
+              <label>Expense Title / Description</label>
+              <input type="text" name="description" id="editExpenseDescription" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Paid To (Payee)</label>
+              <input type="text" name="paidTo" id="editExpensePaidTo" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select name="paymentMethod" id="editExpensePaymentMethod" class="form-control">
+                <option value="Personal UPI">Personal UPI</option>
+                <option value="Personal Bank Transfer">Personal Bank Transfer</option>
+                <option value="Personal Cash">Personal Cash</option>
+                <option value="Personal Credit Card">Personal Credit Card</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label>Receipt / Memo</label>
+              <input type="text" name="notes" id="editExpenseNotes" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editExpenseModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4C. INTER-PARTNER SETTLEMENT TRANSFER MODAL -->
+  <div id="partnerTransferModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>💸 Inter-Partner Cash Transfer / Settlement</h3>
+          <div class="modal-subtitle">Transfer money directly from one partner's personal account to another</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('partnerTransferModal')">✕</button>
+      </div>
+      <form id="partnerTransferForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>From (Partner Sending Money)</label>
+              <select name="fromPartnerId" id="transferFromPartnerSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>To (Partner Receiving Money)</label>
+              <select name="toPartnerId" id="transferToPartnerSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group form-full">
+              <label>Transfer Amount (₹)</label>
+              <input type="number" step="1" min="1" name="amount" id="transferAmount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="form-group form-full">
+              <label>Notes / Reason</label>
+              <input type="text" name="notes" class="form-control" placeholder="e.g. Sales collection settlement / Expense reimbursement">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('partnerTransferModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Record Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. ADD PARTNER TX MODAL -->
+  <div id="partnerTxModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Partner Capital / Drawing Transaction</h3>
+          <div class="modal-subtitle">Record equity additions or profit withdrawals in ₹</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('partnerTxModal')">✕</button>
+      </div>
+      <form id="partnerTxForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Select Partner</label>
+              <select name="partnerId" id="partnerTxPartnerSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Transaction Action</label>
+              <select name="type" id="partnerTxType" class="form-control" required>
+                <option value="INJECTION">+ Capital Injection (Partner Adds Money)</option>
+                <option value="DRAWING">- Profit Drawing (Partner Takes Payout)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount (₹)</label>
+              <input type="number" step="1" min="1" name="amount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" name="date" id="partnerTxDate" class="form-control" required>
+            </div>
+            <div class="form-group form-full">
+              <label>Reason / Description</label>
+              <input type="text" name="reason" class="form-control" placeholder="e.g. Q1 Profit Distribution or Capital Addition">
+            </div>
+            <div class="form-group">
+              <label>Payment Channel</label>
+              <select name="paymentMethod" class="form-control">
+                <option value="Bank Transfer">Bank Transfer (NEFT/RTGS)</option>
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('partnerTxModal')">Cancel</button>
+          <button type="submit" class="btn btn-purple">Submit Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4B. EDIT PARTNER TX MODAL -->
+  <div id="editPartnerTxModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>✎ Edit Partner Capital / Drawing</h3>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('editPartnerTxModal')">✕</button>
+      </div>
+      <form id="editPartnerTxForm">
+        <input type="hidden" name="id" id="editPartnerTxId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Partner</label>
+              <select name="partnerId" id="editPartnerTxPartnerSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Action</label>
+              <select name="type" id="editPartnerTxType" class="form-control" required>
+                <option value="INJECTION">+ Capital Injection</option>
+                <option value="DRAWING">- Profit Drawing / Payout</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount (₹)</label>
+              <input type="number" step="1" min="1" name="amount" id="editPartnerTxAmount" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" name="date" id="editPartnerTxDate" class="form-control" required>
+            </div>
+            <div class="form-group form-full">
+              <label>Reason / Note</label>
+              <input type="text" name="reason" id="editPartnerTxReason" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Payment Channel</label>
+              <select name="paymentMethod" id="editPartnerTxPaymentMethod" class="form-control">
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editPartnerTxModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. ADD PRODUCT MODAL -->
+  <div id="addProductModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Add New Product to Inventory</h3>
+          <div class="modal-subtitle">Set cost price in ₹, storage location, and initial stock counts</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('addProductModal')">✕</button>
+      </div>
+      <form id="addProductForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" name="name" class="form-control" placeholder="e.g. Wireless Ergonomic Mouse" required>
+            </div>
+            <div class="form-group">
+              <label>SKU / Item Code</label>
+              <input type="text" name="sku" class="form-control" placeholder="e.g. SKU-ACC-05">
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" name="category" class="form-control" placeholder="e.g. Electronics, Accessories">
+            </div>
+            <div class="form-group">
+              <label>Storage Location (Warehouse / Shelf)</label>
+              <input type="text" name="location" class="form-control" placeholder="e.g. Warehouse A - Rack 3B, Main Store" value="Warehouse A">
+            </div>
+            <div class="form-group">
+              <label>Unit of Measure</label>
+              <input type="text" name="unit" class="form-control" value="pcs" placeholder="pcs, kg, box">
+            </div>
+            <div class="form-group">
+              <label>Purchase Cost Price (₹)</label>
+              <input type="number" step="1" min="0" name="costPrice" class="form-control" placeholder="0.00" required>
+              <span class="input-hint">Your purchase / landed cost per unit</span>
+            </div>
+            <div class="form-group">
+              <label>Initial Opening Stock</label>
+              <input type="number" min="0" name="initialStock" class="form-control" value="0">
+            </div>
+            <div class="form-group">
+              <label>Low Stock Alert Threshold</label>
+              <input type="number" min="1" name="minThreshold" class="form-control" value="5">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('addProductModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. EDIT PRODUCT MODAL (100% Editable including Stock Count & Location) -->
+  <div id="editProductModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>✎ Edit Product Details & Stock</h3>
+          <div class="modal-subtitle">Directly edit product names, cost prices, storage locations, or inventory counts</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('editProductModal')">✕</button>
+      </div>
+      <form id="editProductForm">
+        <input type="hidden" name="id" id="editProdId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" name="name" id="editProdName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>SKU / Item Code</label>
+              <input type="text" name="sku" id="editProdSku" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" name="category" id="editProdCategory" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Storage Location (Warehouse / Shelf)</label>
+              <input type="text" name="location" id="editProdLocation" class="form-control" placeholder="e.g. Warehouse A - Shelf 2">
+            </div>
+            <div class="form-group">
+              <label>Unit of Measure</label>
+              <input type="text" name="unit" id="editProdUnit" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Purchase Cost Price (₹)</label>
+              <input type="number" step="1" min="0" name="costPrice" id="editProdCost" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Current Stock Count in Hand</label>
+              <input type="number" min="0" name="stock" id="editProdStock" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Low Stock Alert Threshold</label>
+              <input type="number" min="1" name="minThreshold" id="editProdMin" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editProductModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. ADJUST STOCK MODAL -->
+  <div id="adjustStockModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Adjust Stock Level</h3>
+          <div class="modal-subtitle" id="adjustProdName">Product</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('adjustStockModal')">✕</button>
+      </div>
+      <form id="adjustStockForm">
+        <input type="hidden" name="id" id="adjustProdId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Adjustment Quantity (+ to add stock, - to write off)</label>
+              <input type="number" name="deltaQty" id="adjustDeltaQty" class="form-control" placeholder="e.g. +5 or -2" required>
+              <span class="input-hint">Use positive integer (e.g. 10) to add stock, negative (e.g. -3) for damaged/lost stock</span>
+            </div>
+            <div class="form-group form-full">
+              <label>Reason / Note</label>
+              <input type="text" name="reason" id="adjustReason" class="form-control" placeholder="e.g. Physical Stock Count Correction" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('adjustStockModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Apply Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. ADD PARTNER MODAL -->
+  <div id="addPartnerModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Add Business Partner</h3>
+          <div class="modal-subtitle">Define profit-sharing ratio and initial capital contribution in ₹</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('addPartnerModal')">✕</button>
+      </div>
+      <form id="addPartnerForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Partner Full Name</label>
+              <input type="text" name="name" class="form-control" placeholder="e.g. Vikram Malhotra" required>
+            </div>
+            <div class="form-group">
+              <label>Role / Title</label>
+              <input type="text" name="role" class="form-control" placeholder="e.g. Managing Partner, Director" value="Partner">
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" class="form-control" placeholder="vikram@company.in">
+            </div>
+            <div class="form-group">
+              <label>Profit Share Ratio (%)</label>
+              <input type="number" step="0.1" min="0" max="100" name="profitShareRatio" class="form-control" placeholder="e.g. 33.3" required>
+            </div>
+            <div class="form-group form-full">
+              <label>Initial Capital Contributed (₹)</label>
+              <input type="number" step="1" min="0" name="initialCapital" class="form-control" placeholder="0.00" value="0">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('addPartnerModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Partner</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. EDIT PARTNER MODAL -->
+  <div id="editPartnerModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Edit Partner Details & Profit Split</h3>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('editPartnerModal')">✕</button>
+      </div>
+      <form id="editPartnerForm">
+        <input type="hidden" name="id" id="editPartnerId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Partner Full Name</label>
+              <input type="text" name="name" id="editPartnerName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Role / Title</label>
+              <input type="text" name="role" id="editPartnerRole" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" id="editPartnerEmail" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Profit Share Ratio (%)</label>
+              <input type="number" step="0.1" min="0" max="100" name="profitShareRatio" id="editPartnerRatio" class="form-control" required>
+            </div>
+            <div class="form-group form-full">
+              <label>Initial Capital (₹)</label>
+              <input type="number" step="1" min="0" name="initialCapital" id="editPartnerCapital" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editPartnerModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 10. TRANSACTION DETAILS MODAL -->
+  <div id="txDetailsModal" class="modal-backdrop">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Transaction Breakdown & Audit Trail</h3>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('txDetailsModal')">✕</button>
+      </div>
+      <div class="modal-body" id="txDetailsModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="UI.closeModal('txDetailsModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. SHARE & COLLABORATION MODAL -->
+  <div id="shareModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>🔗 Live Multi-Partner Collaboration</h3>
+          <div class="modal-subtitle">Share this accounting system with your partners & team</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('shareModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 18px;">
+          <h4 style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+            Option 1: Same Wi-Fi / Office Network (Instant)
+          </h4>
+          <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 10px;">
+            Anyone connected to the same Wi-Fi, hotspot, or local network can open this URL on their phone, tablet, or laptop:
+          </p>
+          <div id="shareLanUrls" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="lanShareInput" class="form-control" value="http://172.60.4.132:3000" readonly style="font-family: var(--font-mono); font-weight: 600;">
+              <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('lanShareInput').value); UI.showToast('Wi-Fi Link copied to clipboard!');">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+          <span style="font-size: 11.5px; color: var(--color-success); font-weight: 600;">
+            ✓ Real-time Sync Active: Changes made by either person instantly update on both screens!
+          </span>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+          <h4 style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+            Option 2: Share Over the Internet (Anywhere in the World - 100% Free)
+          </h4>
+          <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 8px;">
+            To share with a partner in a different city or location, run this single free command in your terminal:
+          </p>
+          <div style="background: var(--bg-surface-elevated); padding: 10px 14px; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 12.5px; color: var(--color-info); border: 1px solid var(--border-subtle); margin-bottom: 8px;">
+            npx localtunnel --port 3000
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted);">
+            This provides a secure public link (e.g. <code>https://your-business.loca.lt</code>) that you can send over WhatsApp or email!
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="UI.closeModal('shareModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/state.js"></script>
+  <script src="js/accounting.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/transactions.js"></script>
+  <script src="js/partners.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/audit.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
