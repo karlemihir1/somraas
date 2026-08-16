@@ -352,14 +352,35 @@ class StateStore {
 
   loadInitialState() {
     let st = null;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        st = JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Failed to parse saved state, using default demo state', e);
+    const allStorageKeys = [
+      STORAGE_KEY,
+      'somraas_store_inr_v1',
+      'equiledger_store_inr_v5',
+      'equiledger_store_inr_v4',
+      'equiledger_store_inr_v3',
+      'equiledger_store_inr_v2',
+      'equiledger_store_inr_v1',
+      'equiledger_store_v1',
+      'equiledger_app_state',
+      'equiledger_state'
+    ];
+
+    for (const key of allStorageKeys) {
+      try {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && Array.isArray(parsed.transactions) && parsed.transactions.length > 0) {
+            st = parsed;
+            console.log(`Auto-migrated data from storage key: ${key}`);
+            break;
+          } else if (!st && parsed && Array.isArray(parsed.partners)) {
+            st = parsed;
+          }
+        }
+      } catch (e) {}
     }
+
     if (!st) {
       st = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
     }
@@ -424,7 +445,7 @@ class StateStore {
     fetch(FIREBASE_DB_URL)
       .then(res => res.json())
       .then(cloudData => {
-        if (cloudData && Array.isArray(cloudData.partners) && Array.isArray(cloudData.products)) {
+        if (cloudData && Array.isArray(cloudData.transactions) && cloudData.transactions.length > 0) {
           const currentActiveUser = this.state.activeUser;
           this.state = cloudData;
           if (!this.state.auditLogs) this.state.auditLogs = [];
@@ -434,7 +455,7 @@ class StateStore {
           this.notify();
           this.updateSyncBadge('online');
         } else {
-          // Cloud database is empty, seed it with current initial state
+          // Cloud database is empty or local state has the user's data -> push local data to cloud!
           this.syncToServer();
         }
       })
