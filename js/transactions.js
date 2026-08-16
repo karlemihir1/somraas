@@ -412,7 +412,10 @@ const TransactionsModule = {
     const num = Math.max(1, parseInt(qty, 10) || 1);
     if (this.saleLineItems[index]) {
       this.saleLineItems[index].quantity = num;
-      this.renderSaleLineItems();
+      const lineTotal = num * (this.saleLineItems[index].unitPrice || 0);
+      const totalEl = document.getElementById(`saleLineTotal_${index}`);
+      if (totalEl) totalEl.innerText = window.UI.formatCurrency(lineTotal);
+      this.updateSaleSummaryBox();
     }
   },
 
@@ -420,7 +423,43 @@ const TransactionsModule = {
     const num = Math.max(0, parseFloat(price) || 0);
     if (this.saleLineItems[index]) {
       this.saleLineItems[index].unitPrice = num;
-      this.renderSaleLineItems();
+      const lineTotal = (this.saleLineItems[index].quantity || 1) * num;
+      const totalEl = document.getElementById(`saleLineTotal_${index}`);
+      if (totalEl) totalEl.innerText = window.UI.formatCurrency(lineTotal);
+      this.updateSaleSummaryBox();
+    }
+  },
+
+  updateSaleSummaryBox() {
+    let totalRevenue = 0;
+    let totalCOGS = 0;
+
+    for (const item of this.saleLineItems) {
+      const lineTotal = (item.quantity || 1) * (item.unitPrice || 0);
+      const lineCost = (item.quantity || 1) * (item.unitCost || 0);
+      totalRevenue += lineTotal;
+      totalCOGS += lineCost;
+    }
+
+    const grossProfit = totalRevenue - totalCOGS;
+    const marginPct = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : 0;
+
+    const summaryBox = document.getElementById('saleSummaryBox');
+    if (summaryBox) {
+      summaryBox.innerHTML = `
+        <div class="order-summary-row">
+          <span>Gross Sales Revenue:</span>
+          <span style="font-weight: 700; color: var(--text-primary);">${window.UI.formatCurrency(totalRevenue)}</span>
+        </div>
+        <div class="order-summary-row">
+          <span>Cost of Goods Sold (COGS):</span>
+          <span style="color: var(--text-muted);">${window.UI.formatCurrency(totalCOGS)}</span>
+        </div>
+        <div class="order-summary-row">
+          <span>Estimated Gross Profit:</span>
+          <span style="font-weight: 700; color: var(--color-success);">${window.UI.formatCurrency(grossProfit)} (${marginPct}%)</span>
+        </div>
+      `;
     }
   },
 
@@ -431,14 +470,8 @@ const TransactionsModule = {
     const state = window.Store.getState();
     const products = state.products || [];
 
-    let totalRevenue = 0;
-    let totalCOGS = 0;
-
     container.innerHTML = this.saleLineItems.map((item, idx) => {
       const lineTotal = (item.quantity || 1) * (item.unitPrice || 0);
-      const lineCost = (item.quantity || 1) * (item.unitCost || 0);
-      totalRevenue += lineTotal;
-      totalCOGS += lineCost;
 
       const productOptions = products.map(p => {
         const isSelected = p.id === item.productId ? 'selected' : '';
@@ -461,11 +494,11 @@ const TransactionsModule = {
           </div>
           <div>
             <label style="font-size: 11px; color: var(--color-primary); font-weight: 700; margin-bottom: 2px; display: block;">Selling Rate (₹)</label>
-            <input type="number" step="1" min="0" class="form-control" style="font-weight: 700; border-color: var(--color-primary);" value="${item.unitPrice || ''}" placeholder="Selling Price" oninput="TransactionsModule.onSalePriceChange(${idx}, this.value)">
+            <input type="number" step="1" min="0" class="form-control" style="font-weight: 700; border-color: var(--color-primary);" value="${item.unitPrice || ''}" placeholder="0" oninput="TransactionsModule.onSalePriceChange(${idx}, this.value)">
           </div>
           <div>
             <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px; display: block;">Line Total</label>
-            <div style="font-weight: 700; color: var(--color-primary); padding: 9px 0;">${window.UI.formatCurrency(lineTotal)}</div>
+            <div id="saleLineTotal_${idx}" style="font-weight: 700; color: var(--color-primary); padding: 9px 0;">${window.UI.formatCurrency(lineTotal)}</div>
           </div>
           <div>
             <label style="font-size: 11px; visibility: hidden; margin-bottom: 2px; display: block;">Del</label>
@@ -477,26 +510,7 @@ const TransactionsModule = {
       `;
     }).join('');
 
-    const grossProfit = totalRevenue - totalCOGS;
-    const marginPct = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : 0;
-
-    const summaryBox = document.getElementById('saleSummaryBox');
-    if (summaryBox) {
-      summaryBox.innerHTML = `
-        <div class="order-summary-row">
-          <span>Gross Sales Revenue:</span>
-          <span style="font-weight: 700; color: var(--text-primary);">${window.UI.formatCurrency(totalRevenue)}</span>
-        </div>
-        <div class="order-summary-row">
-          <span>Cost of Goods Sold (COGS):</span>
-          <span style="color: var(--text-muted);">${window.UI.formatCurrency(totalCOGS)}</span>
-        </div>
-        <div class="order-summary-row">
-          <span>Estimated Gross Profit:</span>
-          <span style="font-weight: 700; color: var(--color-success);">${window.UI.formatCurrency(grossProfit)} (${marginPct}%)</span>
-        </div>
-      `;
-    }
+    this.updateSaleSummaryBox();
   },
 
   handleSaleSubmit(formData) {
@@ -631,7 +645,10 @@ const TransactionsModule = {
     const num = Math.max(1, parseInt(qty, 10) || 1);
     if (this.editingSaleLineItems[idx]) {
       this.editingSaleLineItems[idx].quantity = num;
-      this.renderEditSaleLineItems();
+      const lineTotal = num * (this.editingSaleLineItems[idx].unitPrice || 0);
+      const totalEl = document.getElementById(`editSaleLineTotal_${idx}`);
+      if (totalEl) totalEl.innerText = window.UI.formatCurrency(lineTotal);
+      this.updateEditSaleSummaryBox();
     }
   },
 
@@ -639,7 +656,43 @@ const TransactionsModule = {
     const num = Math.max(0, parseFloat(price) || 0);
     if (this.editingSaleLineItems[idx]) {
       this.editingSaleLineItems[idx].unitPrice = num;
-      this.renderEditSaleLineItems();
+      const lineTotal = (this.editingSaleLineItems[idx].quantity || 1) * num;
+      const totalEl = document.getElementById(`editSaleLineTotal_${idx}`);
+      if (totalEl) totalEl.innerText = window.UI.formatCurrency(lineTotal);
+      this.updateEditSaleSummaryBox();
+    }
+  },
+
+  updateEditSaleSummaryBox() {
+    let totalRevenue = 0;
+    let totalCOGS = 0;
+
+    for (const item of this.editingSaleLineItems) {
+      const lineTotal = (item.quantity || 1) * (item.unitPrice || 0);
+      const lineCost = (item.quantity || 1) * (item.unitCost || 0);
+      totalRevenue += lineTotal;
+      totalCOGS += lineCost;
+    }
+
+    const grossProfit = totalRevenue - totalCOGS;
+    const marginPct = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : 0;
+
+    const summaryBox = document.getElementById('editSaleSummaryBox');
+    if (summaryBox) {
+      summaryBox.innerHTML = `
+        <div class="order-summary-row">
+          <span>Updated Revenue:</span>
+          <span style="font-weight: 700; color: var(--text-primary);">${window.UI.formatCurrency(totalRevenue)}</span>
+        </div>
+        <div class="order-summary-row">
+          <span>Updated COGS:</span>
+          <span style="color: var(--text-muted);">${window.UI.formatCurrency(totalCOGS)}</span>
+        </div>
+        <div class="order-summary-row">
+          <span>Updated Gross Profit:</span>
+          <span style="font-weight: 700; color: var(--color-success);">${window.UI.formatCurrency(grossProfit)} (${marginPct}%)</span>
+        </div>
+      `;
     }
   },
 
@@ -648,14 +701,9 @@ const TransactionsModule = {
     if (!container) return;
 
     const products = window.Store.getState().products || [];
-    let totalRevenue = 0;
-    let totalCOGS = 0;
 
     container.innerHTML = this.editingSaleLineItems.map((item, idx) => {
       const lineTotal = (item.quantity || 1) * (item.unitPrice || 0);
-      const lineCost = (item.quantity || 1) * (item.unitCost || 0);
-      totalRevenue += lineTotal;
-      totalCOGS += lineCost;
 
       const productOptions = products.map(p => {
         const isSelected = p.id === item.productId ? 'selected' : '';
@@ -678,11 +726,11 @@ const TransactionsModule = {
           </div>
           <div>
             <label style="font-size: 11px; color: var(--color-primary); font-weight: 700; margin-bottom: 2px; display: block;">Selling Rate (₹)</label>
-            <input type="number" step="1" min="0" class="form-control" style="font-weight: 700; border-color: var(--color-primary);" value="${item.unitPrice}" oninput="TransactionsModule.onEditSalePriceChange(${idx}, this.value)">
+            <input type="number" step="1" min="0" class="form-control" style="font-weight: 700; border-color: var(--color-primary);" value="${item.unitPrice || ''}" placeholder="0" oninput="TransactionsModule.onEditSalePriceChange(${idx}, this.value)">
           </div>
           <div>
             <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px; display: block;">Line Total</label>
-            <div style="font-weight: 700; color: var(--color-primary); padding: 9px 0;">${window.UI.formatCurrency(lineTotal)}</div>
+            <div id="editSaleLineTotal_${idx}" style="font-weight: 700; color: var(--color-primary); padding: 9px 0;">${window.UI.formatCurrency(lineTotal)}</div>
           </div>
           <div>
             <label style="font-size: 11px; visibility: hidden; margin-bottom: 2px; display: block;">Del</label>
@@ -694,26 +742,7 @@ const TransactionsModule = {
       `;
     }).join('');
 
-    const grossProfit = totalRevenue - totalCOGS;
-    const marginPct = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : 0;
-
-    const summaryBox = document.getElementById('editSaleSummaryBox');
-    if (summaryBox) {
-      summaryBox.innerHTML = `
-        <div class="order-summary-row">
-          <span>Updated Gross Revenue:</span>
-          <span style="font-weight: 700; color: var(--text-primary);">${window.UI.formatCurrency(totalRevenue)}</span>
-        </div>
-        <div class="order-summary-row">
-          <span>Updated COGS:</span>
-          <span style="color: var(--text-muted);">${window.UI.formatCurrency(totalCOGS)}</span>
-        </div>
-        <div class="order-summary-row">
-          <span>Updated Gross Profit:</span>
-          <span style="font-weight: 700; color: var(--color-success);">${window.UI.formatCurrency(grossProfit)} (${marginPct}%)</span>
-        </div>
-      `;
-    }
+    this.updateEditSaleSummaryBox();
   },
 
   handleEditSaleSubmit(formData) {
