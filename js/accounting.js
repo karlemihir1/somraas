@@ -5,6 +5,28 @@
 
 const AccountingEngine = {
 
+  // Compatibility alias for summary calculations
+  calculateFinancialSummary(state, period = 'ALL') {
+    const f = this.calculateFinancials(state, period);
+    return {
+      ...f,
+      totalRevenue: f.revenue,
+      totalCOGS: f.cogs,
+      totalExpenses: f.expenses,
+      grossProfit: f.grossProfit,
+      grossMarginPercent: f.grossMarginPercent,
+      netProfit: f.netProfit,
+      netMarginPercent: f.netMarginPercent,
+      inventory: {
+        totalCostValue: f.inventoryValuation,
+        totalStockUnits: f.totalStockUnits
+      },
+      cash: {
+        balance: f.liquidCashBalance
+      }
+    };
+  },
+
   // Core Financial Statements in ₹ INR
   calculateFinancials(state, period = 'ALL') {
     const transactions = this.filterTransactionsByPeriod(state.transactions || [], period);
@@ -16,6 +38,7 @@ const AccountingEngine = {
     let totalExpenses = 0;
     let totalInjections = 0;
     let totalDrawings = 0;
+    const expensesByCategory = {};
 
     for (const tx of transactions) {
       const amount = Number(tx.amount) || 0;
@@ -26,6 +49,8 @@ const AccountingEngine = {
           break;
         case 'EXPENSE':
           totalExpenses += amount;
+          const cat = tx.category || 'General Expense';
+          expensesByCategory[cat] = (expensesByCategory[cat] || 0) + amount;
           break;
         case 'PURCHASE':
           break;
@@ -138,6 +163,7 @@ const AccountingEngine = {
       grossProfit,
       grossMarginPercent,
       expenses: totalExpenses,
+      expensesByCategory,
       netProfit,
       netMarginPercent,
       inventoryValuation: totalInventoryValuation,
