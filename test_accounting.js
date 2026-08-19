@@ -48,8 +48,34 @@ for (const p of report.partnerSummaries) {
 
 // Validation
 if (report.grossProfit === 160753 && report.netProfit === 79053) {
-  console.log('\n--- ALL ACCOUNTING & PERSONAL ACCOUNT TESTS PASSED WITH 100% ACCURACY! ---');
+  console.log('\n--- BASE ACCOUNTING & PERSONAL ACCOUNT TESTS PASSED! ---');
 } else {
   console.error('Test mismatch!', report);
+  process.exit(1);
+}
+
+// Test Multi-Partner Split Stock Purchase
+console.log('\n--- Testing Multi-Partner Split Stock Purchase ---');
+const splitState = JSON.parse(JSON.stringify(mockState));
+splitState.transactions.push({
+  type: 'PURCHASE',
+  amount: 60000,
+  payers: [
+    { partnerId: 'partner_aarav', partnerName: 'Aarav Sharma', amount: 35000 },
+    { partnerId: 'partner_rohan', partnerName: 'Rohan Verma', amount: 25000 }
+  ]
+});
+
+const splitReport = AccountingEngine.calculateFinancials(splitState, 'ALL');
+const aarav = splitReport.partnerSummaries.find(p => p.partnerId === 'partner_aarav');
+const rohan = splitReport.partnerSummaries.find(p => p.partnerId === 'partner_rohan');
+
+console.log(`Aarav stock paid: ₹${aarav.restocksPaid} (Expected: 35,000)`);
+console.log(`Rohan stock paid: ₹${rohan.restocksPaid} (Expected: 25,000)`);
+
+if (aarav.restocksPaid === 35000 && rohan.restocksPaid === 25000) {
+  console.log('--- ALL MULTI-PARTNER STOCK SPLIT SETTLEMENT TESTS PASSED WITH 100% ACCURACY! ---');
+} else {
+  console.error('Split test failed!');
   process.exit(1);
 }

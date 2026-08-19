@@ -218,7 +218,14 @@ const TransactionsModule = {
       let accountBadge = '';
       if (tx.type === 'SALE' && tx.holdingPartnerName) {
         accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(16, 185, 129, 0.1); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💰 Received in: <strong>${tx.holdingPartnerName}'s Account</strong></span>`;
-      } else if ((tx.type === 'EXPENSE' || tx.type === 'PURCHASE') && tx.holdingPartnerName) {
+      } else if (tx.type === 'PURCHASE') {
+        if (tx.payers && Array.isArray(tx.payers) && tx.payers.length > 0) {
+          const payerStr = tx.payers.map(p => `<strong>${p.partnerName}</strong> (₹${Number(p.amount).toLocaleString('en-IN')})`).join(' + ');
+          accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(245, 158, 11, 0.12); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">📦 Stock Paid by: ${payerStr}</span>`;
+        } else if (tx.holdingPartnerName) {
+          accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(239, 68, 68, 0.08); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💳 Paid by: <strong>${tx.holdingPartnerName}'s Account</strong></span>`;
+        }
+      } else if (tx.type === 'EXPENSE' && tx.holdingPartnerName) {
         accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(239, 68, 68, 0.08); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💳 Paid by: <strong>${tx.holdingPartnerName}'s Account</strong></span>`;
       } else if (tx.type === 'TRANSFER') {
         accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(59, 130, 246, 0.08); color: var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.2); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">From: <strong>${tx.fromPartnerName}</strong> → To: <strong>${tx.toPartnerName}</strong></span>`;
@@ -801,7 +808,7 @@ const TransactionsModule = {
   },
 
   // -------------------------------------------------------------
-  // RESTOCK WORKFLOW (TRACK WHICH PERSONAL ACCOUNT PAID)
+  // RESTOCK WORKFLOW (TRACK WHICH PERSONAL ACCOUNTS PAID FOR STOCK)
   // -------------------------------------------------------------
   openRestockModal() {
     const form = document.getElementById('restockForm');
@@ -824,8 +831,149 @@ const TransactionsModule = {
       }
     }
 
+    // Initialize Payer Modes
+    const singleRadio = document.querySelector('input[name="restockPaymentType"][value="SINGLE"]');
+    if (singleRadio) singleRadio.checked = true;
+    this.onRestockPaymentTypeToggle('SINGLE');
+    this.populateRestockSplitPayers();
+
     this.calculateRestockTotal();
     window.UI.openModal('restockModal');
+  },
+
+  populateRestockSplitPayers(defaultPayers = []) {
+    const container = document.getElementById('restockSplitPayersList');
+    if (!container) return;
+
+    const state = window.Store.getState();
+    const partners = state.partners || [];
+
+    const defaultMap = {};
+    for (const dp of defaultPayers) {
+      defaultMap[dp.partnerId] = dp.amount;
+    }
+
+    container.innerHTML = partners.map(partner => {
+      const initVal = defaultMap[partner.id] !== undefined ? defaultMap[partner.id] : '';
+      return `
+        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--color-primary); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+              ${partner.name[0].toUpperCase()}
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${partner.name}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">${partner.role || 'Partner'} (${partner.profitShareRatio}%)</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">₹</span>
+            <input type="number" step="1" min="0" id="restockPayerAmt_${partner.id}" data-partner-id="${partner.id}" data-partner-name="${partner.name}" class="form-control" style="width: 130px; font-weight: 700; text-align: right;" value="${initVal}" placeholder="0" oninput="TransactionsModule.onRestockPayerAmountChange()">
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    this.onRestockPayerAmountChange();
+  },
+
+  onRestockPaymentTypeToggle(mode) {
+    const singleWrap = document.getElementById('restockSinglePayerWrapper');
+    const splitWrap = document.getElementById('restockSplitPayersWrapper');
+
+    if (mode === 'SINGLE') {
+      if (singleWrap) singleWrap.style.display = 'block';
+      if (splitWrap) splitWrap.style.display = 'none';
+      const badge = document.getElementById('restockPayerStatusBadge');
+      if (badge) {
+        badge.innerHTML = '✓ 100% Single Payer';
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.color = 'var(--color-success)';
+        badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+      }
+    } else {
+      if (singleWrap) singleWrap.style.display = 'none';
+      if (splitWrap) splitWrap.style.display = 'block';
+      this.onRestockPayerAmountChange();
+    }
+  },
+
+  splitRestockEqually() {
+    const qty = parseInt(document.getElementById('restockQty')?.value, 10) || 0;
+    const cost = parseFloat(document.getElementById('restockUnitCost')?.value) || 0;
+    const totalCost = qty * cost;
+
+    const state = window.Store.getState();
+    const partners = state.partners || [];
+    if (partners.length === 0 || totalCost <= 0) return;
+
+    const baseShare = Math.floor(totalCost / partners.length);
+    let remainder = totalCost - (baseShare * partners.length);
+
+    partners.forEach((p, idx) => {
+      const input = document.getElementById(`restockPayerAmt_${p.id}`);
+      if (input) {
+        const amt = baseShare + (idx === 0 ? remainder : 0);
+        input.value = amt;
+      }
+    });
+
+    this.onRestockPayerAmountChange();
+  },
+
+  clearRestockPayers() {
+    const state = window.Store.getState();
+    (state.partners || []).forEach(p => {
+      const input = document.getElementById(`restockPayerAmt_${p.id}`);
+      if (input) input.value = '';
+    });
+    this.onRestockPayerAmountChange();
+  },
+
+  onRestockPayerAmountChange() {
+    const mode = document.querySelector('input[name="restockPaymentType"]:checked')?.value || 'SINGLE';
+    const badge = document.getElementById('restockPayerStatusBadge');
+    if (!badge) return;
+
+    if (mode === 'SINGLE') {
+      badge.innerHTML = '✓ 100% Single Payer';
+      badge.style.background = 'rgba(16, 185, 129, 0.15)';
+      badge.style.color = 'var(--color-success)';
+      badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+      return;
+    }
+
+    const qty = parseInt(document.getElementById('restockQty')?.value, 10) || 0;
+    const cost = parseFloat(document.getElementById('restockUnitCost')?.value) || 0;
+    const totalCost = qty * cost;
+
+    let totalAllocated = 0;
+    const inputs = document.querySelectorAll('#restockSplitPayersList input[data-partner-id]');
+    inputs.forEach(inp => {
+      totalAllocated += (parseFloat(inp.value) || 0);
+    });
+
+    if (totalCost === 0) {
+      badge.innerHTML = 'Set Quantity & Cost';
+      badge.style.background = 'rgba(100, 116, 139, 0.15)';
+      badge.style.color = 'var(--text-muted)';
+      badge.style.borderColor = 'var(--border-subtle)';
+    } else if (Math.abs(totalAllocated - totalCost) < 0.01) {
+      badge.innerHTML = `✓ Matches 100% (${window.UI.formatCurrency(totalAllocated)})`;
+      badge.style.background = 'rgba(16, 185, 129, 0.15)';
+      badge.style.color = 'var(--color-success)';
+      badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+    } else {
+      const diff = totalCost - totalAllocated;
+      if (diff > 0) {
+        badge.innerHTML = `⚠️ Remaining: ${window.UI.formatCurrency(diff)} to allocate`;
+      } else {
+        badge.innerHTML = `⚠️ Over by ${window.UI.formatCurrency(Math.abs(diff))}`;
+      }
+      badge.style.background = 'rgba(239, 68, 68, 0.12)';
+      badge.style.color = 'var(--color-danger)';
+      badge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+    }
   },
 
   onRestockProductChange(productId) {
@@ -839,8 +987,10 @@ const TransactionsModule = {
   calculateRestockTotal() {
     const qty = parseInt(document.getElementById('restockQty')?.value, 10) || 0;
     const cost = parseFloat(document.getElementById('restockUnitCost')?.value) || 0;
+    const totalCost = qty * cost;
     const previewEl = document.getElementById('restockTotalPreview');
-    if (previewEl) previewEl.innerText = window.UI.formatCurrency(qty * cost);
+    if (previewEl) previewEl.innerText = window.UI.formatCurrency(totalCost);
+    this.onRestockPayerAmountChange();
   },
 
   handleRestockSubmit(formData) {
@@ -848,29 +998,73 @@ const TransactionsModule = {
     const vendor = formData.get('vendor')?.trim() || 'General Supplier';
     const quantity = parseInt(formData.get('quantity'), 10) || 0;
     const unitCost = parseFloat(formData.get('unitCost')) || 0;
-    const holdingPartnerId = formData.get('holdingPartnerId');
     const date = formData.get('date') || new Date().toISOString().split('T')[0];
     const paymentMethod = formData.get('paymentMethod') || 'Personal Bank Transfer';
     const notes = formData.get('notes')?.trim() || '';
+    const paymentType = document.querySelector('input[name="restockPaymentType"]:checked')?.value || 'SINGLE';
 
     const prod = window.Store.getState().products.find(p => p.id === productId);
-    const holdingPartner = window.Store.getState().partners.find(p => p.id === holdingPartnerId);
-
     if (!prod || quantity <= 0) {
       window.UI.showToast('Please specify a valid product and quantity.', 'danger');
       return;
     }
 
     const totalCost = quantity * unitCost;
+    let payers = [];
+    let holdingPartnerId = null;
+    let holdingPartnerName = 'Personal Account';
+    let payerDescription = '';
+
+    if (paymentType === 'SINGLE') {
+      holdingPartnerId = formData.get('holdingPartnerId');
+      const holdingPartner = window.Store.getState().partners.find(p => p.id === holdingPartnerId) || window.Store.getState().partners[0];
+      if (holdingPartner) {
+        holdingPartnerId = holdingPartner.id;
+        holdingPartnerName = holdingPartner.name;
+        payers = [{ partnerId: holdingPartner.id, partnerName: holdingPartner.name, amount: totalCost }];
+        payerDescription = `Paid by ${holdingPartner.name}`;
+      }
+    } else {
+      // Split / Multiple Payers
+      const inputs = document.querySelectorAll('#restockSplitPayersList input[data-partner-id]');
+      let sum = 0;
+      inputs.forEach(inp => {
+        const amt = parseFloat(inp.value) || 0;
+        if (amt > 0) {
+          payers.push({
+            partnerId: inp.getAttribute('data-partner-id'),
+            partnerName: inp.getAttribute('data-partner-name'),
+            amount: amt
+          });
+          sum += amt;
+        }
+      });
+
+      if (Math.abs(sum - totalCost) > 0.5) {
+        window.UI.showToast(`Partner payer amounts (${window.UI.formatCurrency(sum)}) must equal total stock cost (${window.UI.formatCurrency(totalCost)}).`, 'danger', 4000);
+        return;
+      }
+
+      if (payers.length === 1) {
+        holdingPartnerId = payers[0].partnerId;
+        holdingPartnerName = payers[0].partnerName;
+        payerDescription = `Paid by ${payers[0].partnerName}`;
+      } else {
+        holdingPartnerId = payers[0]?.partnerId || null;
+        holdingPartnerName = 'Multiple Partners (Split)';
+        payerDescription = `Stock Paid by: ` + payers.map(p => `${p.partnerName} (₹${p.amount.toLocaleString('en-IN')})`).join(' + ');
+      }
+    }
 
     window.Store.addTransaction({
       type: 'PURCHASE',
       date,
       vendor,
-      holdingPartnerId: holdingPartner ? holdingPartner.id : null,
-      holdingPartnerName: holdingPartner ? holdingPartner.name : 'Personal Account',
+      holdingPartnerId,
+      holdingPartnerName,
+      payers,
       category: 'Inventory Restock',
-      description: `Restocked ${quantity}x ${prod.name} from ${vendor} (Paid by ${holdingPartner ? holdingPartner.name : 'Partner'})`,
+      description: `Restocked ${quantity}x ${prod.name} from ${vendor} (${payerDescription})`,
       amount: totalCost,
       cogs: 0,
       stockImpact: quantity,
@@ -881,9 +1075,10 @@ const TransactionsModule = {
 
     window.Store.updateProduct(prod.id, { costPrice: unitCost });
     window.UI.closeModal('restockModal');
-    window.UI.showToast(`Restocked ${quantity} units. Paid from ${holdingPartner ? holdingPartner.name : 'Partner'}'s account.`);
+    window.UI.showToast(`Restocked ${quantity} units of "${prod.name}" successfully!`);
   },
 
+  // Edit Restock
   openEditRestockModal(tx) {
     this.populatePartnerAccountDropdowns();
     document.getElementById('editRestockTxId').value = tx.id;
@@ -906,16 +1101,162 @@ const TransactionsModule = {
 
     document.getElementById('editRestockQty').value = firstItem.quantity || 1;
     document.getElementById('editRestockUnitCost').value = firstItem.unitCost || 0;
-    this.calculateEditRestockTotal();
 
+    // Determine if previous restock was split or single
+    const isSplit = tx.payers && Array.isArray(tx.payers) && tx.payers.length > 1;
+    const mode = isSplit ? 'SPLIT' : 'SINGLE';
+    const radio = document.querySelector(`input[name="editRestockPaymentType"][value="${mode}"]`);
+    if (radio) radio.checked = true;
+
+    this.populateEditRestockSplitPayers(tx.payers || []);
+    this.onEditRestockPaymentTypeToggle(mode);
+
+    this.calculateEditRestockTotal();
     window.UI.openModal('editRestockModal');
+  },
+
+  populateEditRestockSplitPayers(defaultPayers = []) {
+    const container = document.getElementById('editRestockSplitPayersList');
+    if (!container) return;
+
+    const state = window.Store.getState();
+    const partners = state.partners || [];
+
+    const defaultMap = {};
+    for (const dp of defaultPayers) {
+      defaultMap[dp.partnerId] = dp.amount;
+    }
+
+    container.innerHTML = partners.map(partner => {
+      const initVal = defaultMap[partner.id] !== undefined ? defaultMap[partner.id] : '';
+      return `
+        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--color-primary); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+              ${partner.name[0].toUpperCase()}
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${partner.name}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">${partner.role || 'Partner'}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">₹</span>
+            <input type="number" step="1" min="0" id="editRestockPayerAmt_${partner.id}" data-partner-id="${partner.id}" data-partner-name="${partner.name}" class="form-control" style="width: 130px; font-weight: 700; text-align: right;" value="${initVal}" placeholder="0" oninput="TransactionsModule.onEditRestockPayerAmountChange()">
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    this.onEditRestockPayerAmountChange();
+  },
+
+  onEditRestockPaymentTypeToggle(mode) {
+    const singleWrap = document.getElementById('editRestockSinglePayerWrapper');
+    const splitWrap = document.getElementById('editRestockSplitPayersWrapper');
+
+    if (mode === 'SINGLE') {
+      if (singleWrap) singleWrap.style.display = 'block';
+      if (splitWrap) splitWrap.style.display = 'none';
+      const badge = document.getElementById('editRestockPayerStatusBadge');
+      if (badge) {
+        badge.innerHTML = '✓ 100% Single Payer';
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.color = 'var(--color-success)';
+        badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+      }
+    } else {
+      if (singleWrap) singleWrap.style.display = 'none';
+      if (splitWrap) splitWrap.style.display = 'block';
+      this.onEditRestockPayerAmountChange();
+    }
+  },
+
+  splitEditRestockEqually() {
+    const qty = parseInt(document.getElementById('editRestockQty')?.value, 10) || 0;
+    const cost = parseFloat(document.getElementById('editRestockUnitCost')?.value) || 0;
+    const totalCost = qty * cost;
+
+    const state = window.Store.getState();
+    const partners = state.partners || [];
+    if (partners.length === 0 || totalCost <= 0) return;
+
+    const baseShare = Math.floor(totalCost / partners.length);
+    let remainder = totalCost - (baseShare * partners.length);
+
+    partners.forEach((p, idx) => {
+      const input = document.getElementById(`editRestockPayerAmt_${p.id}`);
+      if (input) {
+        const amt = baseShare + (idx === 0 ? remainder : 0);
+        input.value = amt;
+      }
+    });
+
+    this.onEditRestockPayerAmountChange();
+  },
+
+  clearEditRestockPayers() {
+    const state = window.Store.getState();
+    (state.partners || []).forEach(p => {
+      const input = document.getElementById(`editRestockPayerAmt_${p.id}`);
+      if (input) input.value = '';
+    });
+    this.onEditRestockPayerAmountChange();
+  },
+
+  onEditRestockPayerAmountChange() {
+    const mode = document.querySelector('input[name="editRestockPaymentType"]:checked')?.value || 'SINGLE';
+    const badge = document.getElementById('editRestockPayerStatusBadge');
+    if (!badge) return;
+
+    if (mode === 'SINGLE') {
+      badge.innerHTML = '✓ 100% Single Payer';
+      badge.style.background = 'rgba(16, 185, 129, 0.15)';
+      badge.style.color = 'var(--color-success)';
+      badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+      return;
+    }
+
+    const qty = parseInt(document.getElementById('editRestockQty')?.value, 10) || 0;
+    const cost = parseFloat(document.getElementById('editRestockUnitCost')?.value) || 0;
+    const totalCost = qty * cost;
+
+    let totalAllocated = 0;
+    const inputs = document.querySelectorAll('#editRestockSplitPayersList input[data-partner-id]');
+    inputs.forEach(inp => {
+      totalAllocated += (parseFloat(inp.value) || 0);
+    });
+
+    if (totalCost === 0) {
+      badge.innerHTML = 'Set Quantity & Cost';
+      badge.style.background = 'rgba(100, 116, 139, 0.15)';
+      badge.style.color = 'var(--text-muted)';
+      badge.style.borderColor = 'var(--border-subtle)';
+    } else if (Math.abs(totalAllocated - totalCost) < 0.01) {
+      badge.innerHTML = `✓ Matches 100% (${window.UI.formatCurrency(totalAllocated)})`;
+      badge.style.background = 'rgba(16, 185, 129, 0.15)';
+      badge.style.color = 'var(--color-success)';
+      badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+    } else {
+      const diff = totalCost - totalAllocated;
+      if (diff > 0) {
+        badge.innerHTML = `⚠️ Remaining: ${window.UI.formatCurrency(diff)}`;
+      } else {
+        badge.innerHTML = `⚠️ Over by ${window.UI.formatCurrency(Math.abs(diff))}`;
+      }
+      badge.style.background = 'rgba(239, 68, 68, 0.12)';
+      badge.style.color = 'var(--color-danger)';
+      badge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+    }
   },
 
   calculateEditRestockTotal() {
     const qty = parseInt(document.getElementById('editRestockQty')?.value, 10) || 0;
     const cost = parseFloat(document.getElementById('editRestockUnitCost')?.value) || 0;
+    const totalCost = qty * cost;
     const previewEl = document.getElementById('editRestockTotalPreview');
-    if (previewEl) previewEl.innerText = window.UI.formatCurrency(qty * cost);
+    if (previewEl) previewEl.innerText = window.UI.formatCurrency(totalCost);
+    this.onEditRestockPayerAmountChange();
   },
 
   handleEditRestockSubmit(formData) {
@@ -924,23 +1265,67 @@ const TransactionsModule = {
     const vendor = formData.get('vendor')?.trim() || 'Vendor';
     const quantity = parseInt(formData.get('quantity'), 10) || 0;
     const unitCost = parseFloat(formData.get('unitCost')) || 0;
-    const holdingPartnerId = formData.get('holdingPartnerId');
     const date = formData.get('date');
     const paymentMethod = formData.get('paymentMethod');
     const notes = formData.get('notes')?.trim() || '';
+    const paymentType = document.querySelector('input[name="editRestockPaymentType"]:checked')?.value || 'SINGLE';
 
     const prod = window.Store.getState().products.find(p => p.id === productId);
-    const holdingPartner = window.Store.getState().partners.find(p => p.id === holdingPartnerId);
     const totalCost = quantity * unitCost;
+    let payers = [];
+    let holdingPartnerId = null;
+    let holdingPartnerName = 'Personal Account';
+    let payerDescription = '';
+
+    if (paymentType === 'SINGLE') {
+      holdingPartnerId = formData.get('holdingPartnerId');
+      const holdingPartner = window.Store.getState().partners.find(p => p.id === holdingPartnerId) || window.Store.getState().partners[0];
+      if (holdingPartner) {
+        holdingPartnerId = holdingPartner.id;
+        holdingPartnerName = holdingPartner.name;
+        payers = [{ partnerId: holdingPartner.id, partnerName: holdingPartner.name, amount: totalCost }];
+        payerDescription = `Paid by ${holdingPartner.name}`;
+      }
+    } else {
+      const inputs = document.querySelectorAll('#editRestockSplitPayersList input[data-partner-id]');
+      let sum = 0;
+      inputs.forEach(inp => {
+        const amt = parseFloat(inp.value) || 0;
+        if (amt > 0) {
+          payers.push({
+            partnerId: inp.getAttribute('data-partner-id'),
+            partnerName: inp.getAttribute('data-partner-name'),
+            amount: amt
+          });
+          sum += amt;
+        }
+      });
+
+      if (Math.abs(sum - totalCost) > 0.5) {
+        window.UI.showToast(`Partner payer amounts (${window.UI.formatCurrency(sum)}) must equal total stock cost (${window.UI.formatCurrency(totalCost)}).`, 'danger', 4000);
+        return;
+      }
+
+      if (payers.length === 1) {
+        holdingPartnerId = payers[0].partnerId;
+        holdingPartnerName = payers[0].partnerName;
+        payerDescription = `Paid by ${payers[0].partnerName}`;
+      } else {
+        holdingPartnerId = payers[0]?.partnerId || null;
+        holdingPartnerName = 'Multiple Partners (Split)';
+        payerDescription = `Stock Paid by: ` + payers.map(p => `${p.partnerName} (₹${p.amount.toLocaleString('en-IN')})`).join(' + ');
+      }
+    }
 
     window.Store.updateTransaction(txId, {
       vendor,
       date,
-      holdingPartnerId: holdingPartner ? holdingPartner.id : null,
-      holdingPartnerName: holdingPartner ? holdingPartner.name : 'Personal Account',
+      holdingPartnerId,
+      holdingPartnerName,
+      payers,
       paymentMethod,
       notes,
-      description: `Restocked ${quantity}x ${prod ? prod.name : 'Item'} from ${vendor} (Paid by ${holdingPartner ? holdingPartner.name : 'Partner'})`,
+      description: `Restocked ${quantity}x ${prod ? prod.name : 'Item'} from ${vendor} (${payerDescription})`,
       amount: totalCost,
       stockImpact: quantity,
       items: [{ productId, productName: prod ? prod.name : 'Product', quantity, unitCost, totalCost }]

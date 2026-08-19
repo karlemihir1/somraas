@@ -110,8 +110,18 @@ const AccountingEngine = {
         partnerSummaries[holdingPartner].salesCollected += amount;
       } else if (tx.type === 'EXPENSE' && holdingPartner && partnerSummaries[holdingPartner]) {
         partnerSummaries[holdingPartner].expensesPaid += amount;
-      } else if (tx.type === 'PURCHASE' && holdingPartner && partnerSummaries[holdingPartner]) {
-        partnerSummaries[holdingPartner].restocksPaid += amount;
+      } else if (tx.type === 'PURCHASE') {
+        if (tx.payers && Array.isArray(tx.payers) && tx.payers.length > 0) {
+          for (const payer of tx.payers) {
+            const pId = payer.partnerId;
+            const pAmt = Number(payer.amount) || 0;
+            if (pId && partnerSummaries[pId]) {
+              partnerSummaries[pId].restocksPaid += pAmt;
+            }
+          }
+        } else if (holdingPartner && partnerSummaries[holdingPartner]) {
+          partnerSummaries[holdingPartner].restocksPaid += amount;
+        }
       } else if (tx.type === 'INJECTION') {
         const pId = tx.partnerId || holdingPartner;
         if (pId && partnerSummaries[pId]) {
