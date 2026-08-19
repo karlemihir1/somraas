@@ -421,9 +421,9 @@
                   <th>SKU</th>
                   <th>Product Name</th>
                   <th>Category</th>
-                  <th>Storage Location</th>
                   <th>Purchase Cost (₹)</th>
-                  <th>In Stock</th>
+                  <th>Total Stock</th>
+                  <th>Who Has the Stock? (Partner / Location)</th>
                   <th>Stock Valuation (₹)</th>
                   <th>Actions</th>
                 </tr>
@@ -1369,6 +1369,51 @@
     </div>
   </div>
 
+  <!-- 7B. STOCK LOCATION TRANSFER / SHIFT MODAL -->
+  <div id="stockTransferModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>⇄ Shift / Move Stock Location</h3>
+          <div class="modal-subtitle" id="transferProdTitle">Transfer bottles between partners without creating duplicate products</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('stockTransferModal')">✕</button>
+      </div>
+      <form id="stockTransferForm">
+        <input type="hidden" name="productId" id="transferProdId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Transfer Date</label>
+              <input type="date" name="date" id="transferDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>From (Current Partner / Location)</label>
+              <select name="fromLocation" id="transferFromLocationSelect" class="form-control" required onchange="InventoryModule.onTransferFromChange()"></select>
+            </div>
+            <div class="form-group">
+              <label>To (Destination Partner / Location)</label>
+              <select name="toLocation" id="transferToLocationSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group form-full">
+              <label>Quantity to Move (Units / Bottles)</label>
+              <input type="number" min="1" step="1" name="quantity" id="transferQuantity" class="form-control" placeholder="1" required>
+              <span class="input-hint" id="transferAvailableHint" style="color: var(--color-primary); font-weight: 600;">Available: 0 pcs</span>
+            </div>
+            <div class="form-group form-full">
+              <label>Notes / Handover Reason</label>
+              <input type="text" name="notes" id="transferNotes" class="form-control" placeholder="e.g. Handed over bottles for customer delivery">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('stockTransferModal')">Cancel</button>
+          <button type="submit" class="btn btn-purple" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-weight: 700; border: none;">Confirm Shift</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 8. ADD PARTNER MODAL -->
   <div id="addPartnerModal" class="modal-backdrop">
     <div class="modal-card">
@@ -1527,15 +1572,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts with Cache-Busting Version Query -->
-  <script src="js/state.js?v=6.0"></script>
-  <script src="js/accounting.js?v=6.0"></script>
-  <script src="js/ui.js?v=6.0"></script>
-  <script src="js/inventory.js?v=6.0"></script>
-  <script src="js/transactions.js?v=6.0"></script>
-  <script src="js/partners.js?v=6.0"></script>
-  <script src="js/reports.js?v=6.0"></script>
-  <script src="js/audit.js?v=6.0"></script>
-  <script src="js/app.js?v=6.0"></script>
+  <script src="js/state.js?v=7.0"></script>
+  <script src="js/accounting.js?v=7.0"></script>
+  <script src="js/ui.js?v=7.0"></script>
+  <script src="js/inventory.js?v=7.0"></script>
+  <script src="js/transactions.js?v=7.0"></script>
+  <script src="js/partners.js?v=7.0"></script>
+  <script src="js/reports.js?v=7.0"></script>
+  <script src="js/audit.js?v=7.0"></script>
+  <script src="js/app.js?v=7.0"></script>
 
 </body>
 </html>

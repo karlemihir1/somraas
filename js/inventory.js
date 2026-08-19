@@ -1,6 +1,6 @@
 /**
- * EquiLedger Inventory & Stock Management Module (Rupees INR - Storage Location & Purchase Cost)
- * Selling prices are entered directly at the time of making a sale!
+ * Somraas Inventory & Stock Management Module (Rupees INR)
+ * Multi-Partner Stock Holdings, 1-Click Location Transfers & Clean Unified Catalog
  */
 
 const InventoryModule = {
@@ -60,6 +60,14 @@ const InventoryModule = {
         this.handleAdjustStock(new FormData(adjustStockForm));
       });
     }
+
+    const stockTransferForm = document.getElementById('stockTransferForm');
+    if (stockTransferForm) {
+      stockTransferForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleTransferStock(new FormData(stockTransferForm));
+      });
+    }
   },
 
   render() {
@@ -74,11 +82,16 @@ const InventoryModule = {
 
     const filtered = products.filter(prod => {
       const matchesCategory = this.selectedCategory === 'ALL' || prod.category === this.selectedCategory;
-      const matchesLocation = this.selectedLocation === 'ALL' || (prod.location || 'Main Storage') === this.selectedLocation;
+      
+      let matchesLocation = true;
+      if (this.selectedLocation !== 'ALL') {
+        const locs = prod.locationStocks || { [prod.location || 'Varun']: Number(prod.stock) || 0 };
+        matchesLocation = (Number(locs[this.selectedLocation]) || 0) > 0;
+      }
+
       const matchesSearch = !this.searchQuery || 
         prod.name.toLowerCase().includes(this.searchQuery) ||
         (prod.sku && prod.sku.toLowerCase().includes(this.searchQuery)) ||
-        (prod.location && prod.location.toLowerCase().includes(this.searchQuery)) ||
         (prod.category && prod.category.toLowerCase().includes(this.searchQuery));
       return matchesCategory && matchesLocation && matchesSearch;
     });
@@ -90,7 +103,7 @@ const InventoryModule = {
             <div class="empty-state">
               <div class="empty-state-icon">📦</div>
               <div class="empty-state-title">No products found</div>
-              <div class="empty-state-desc">Click "+ Add Product" to add stock items with purchase cost and location.</div>
+              <div class="empty-state-desc">Click "+ Add Product" to add items to your catalog.</div>
             </div>
           </td>
         </tr>
@@ -99,17 +112,45 @@ const InventoryModule = {
     }
 
     tbody.innerHTML = filtered.map(prod => {
-      const stock = Number(prod.stock) || 0;
       const cost = Number(prod.costPrice) || 0;
       const minAlert = Number(prod.minThreshold) || 5;
-      const stockValue = stock * cost;
-      const location = prod.location || 'Main Storage';
+
+      // Location Stocks Mapping
+      const locStocks = prod.locationStocks || { [prod.location || 'Varun']: Number(prod.stock) || 0 };
+      const stockEntries = Object.entries(locStocks).filter(([_, qty]) => Number(qty) > 0);
+      const totalStock = Object.values(locStocks).reduce((a, b) => Number(a) + Number(b), 0);
+      const stockValue = totalStock * cost;
 
       let statusBadge = `<span class="badge badge-instock">✓ In Stock</span>`;
-      if (stock === 0) {
+      if (totalStock === 0) {
         statusBadge = `<span class="badge badge-outstock">✕ Out of Stock</span>`;
-      } else if (stock <= minAlert) {
-        statusBadge = `<span class="badge badge-lowstock">⚠ Low Stock (${stock})</span>`;
+      } else if (totalStock <= minAlert) {
+        statusBadge = `<span class="badge badge-lowstock">⚠ Low Stock</span>`;
+      }
+
+      // Render Partner Location Badges
+      let locationBadgesHtml = '';
+      if (stockEntries.length === 0) {
+        locationBadgesHtml = `<span style="font-size: 11.5px; color: var(--text-muted); font-style: italic;">No stock allocated</span>`;
+      } else {
+        locationBadgesHtml = `
+          <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+            ${stockEntries.map(([loc, qty], idx) => {
+              const colors = [
+                'background: rgba(59, 130, 246, 0.12); color: var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.25);',
+                'background: rgba(16, 185, 129, 0.12); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25);',
+                'background: rgba(139, 92, 246, 0.12); color: var(--color-purple); border: 1px solid rgba(139, 92, 246, 0.25);',
+                'background: rgba(245, 158, 11, 0.12); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.25);'
+              ];
+              const style = colors[idx % colors.length];
+              return `
+                <span style="${style} padding: 3px 8px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                  <span>📍</span> <strong>${loc}:</strong> ${qty} ${prod.unit || 'pcs'}
+                </span>
+              `;
+            }).join('')}
+          </div>
+        `;
       }
 
       return `
@@ -120,7 +161,7 @@ const InventoryModule = {
             </span>
           </td>
           <td>
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 13.5px;">${prod.name}</div>
+            <div style="font-weight: 700; color: var(--text-primary); font-size: 14px;">${prod.name}</div>
             <div style="font-size: 11px; color: var(--text-muted);">Unit: ${prod.unit || 'pcs'}</div>
           </td>
           <td>
@@ -128,26 +169,24 @@ const InventoryModule = {
               ${prod.category || 'General'}
             </span>
           </td>
-          <td>
-            <div style="display: inline-flex; align-items: center; gap: 5px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); padding: 3px 8px; border-radius: var(--radius-sm); font-size: 12px; color: var(--color-primary); font-weight: 600;">
-              <span>📍</span> ${location}
-            </div>
-          </td>
-          <td style="font-weight: 700; color: var(--text-primary);">${window.UI.formatCurrency(cost)}</td>
+          <td style="font-weight: 700; color: var(--text-primary); font-size: 13.5px;">${window.UI.formatCurrency(cost)}</td>
           <td>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 700; font-size: 14px; ${stock <= minAlert ? 'color: var(--color-warning);' : ''}">${stock} ${prod.unit || 'pcs'}</span>
+              <span style="font-weight: 800; font-size: 14.5px; ${totalStock <= minAlert ? 'color: var(--color-warning);' : 'color: var(--text-primary);'}">${totalStock} ${prod.unit || 'pcs'}</span>
               ${statusBadge}
             </div>
           </td>
-          <td style="font-weight: 700; color: var(--color-purple); font-size: 14px;">${window.UI.formatCurrency(stockValue)}</td>
+          <td style="min-width: 200px;">
+            ${locationBadgesHtml}
+          </td>
+          <td style="font-weight: 800; color: var(--color-purple); font-size: 14px;">${window.UI.formatCurrency(stockValue)}</td>
           <td>
             <div style="display: flex; align-items: center; gap: 6px;">
-              <button class="btn btn-primary btn-xs" onclick="InventoryModule.openEditModal('${prod.id}')" title="Edit Product Details, Location & Cost">
-                ✎ Edit
+              <button class="btn btn-purple btn-xs" onclick="InventoryModule.openTransferModal('${prod.id}')" title="Shift / Transfer stock location between partners" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; font-weight: 700; border: none;">
+                ⇄ Shift
               </button>
-              <button class="btn btn-secondary btn-xs" onclick="InventoryModule.openAdjustStockModal('${prod.id}')" title="Quick +/- Stock Count">
-                ± Count
+              <button class="btn btn-primary btn-xs" onclick="InventoryModule.openEditModal('${prod.id}')" title="Edit Product Details & Stock">
+                ✎ Edit
               </button>
               <button class="btn btn-outline btn-xs" style="color: var(--color-danger);" onclick="InventoryModule.confirmDelete('${prod.id}')" title="Delete">
                 ✕
@@ -168,21 +207,24 @@ const InventoryModule = {
     let grandTotalValuation = 0;
 
     for (const prod of products) {
-      const loc = prod.location || 'Main Storage';
-      const stock = Number(prod.stock) || 0;
       const cost = Number(prod.costPrice) || 0;
-      const val = stock * cost;
+      const locStocks = prod.locationStocks || { [prod.location || 'Varun']: Number(prod.stock) || 0 };
 
-      if (!locMap[loc]) {
-        locMap[loc] = { name: loc, units: 0, valuation: 0, itemsCount: 0, items: [] };
+      for (const [loc, rawQty] of Object.entries(locStocks)) {
+        const qty = Number(rawQty) || 0;
+        if (qty > 0) {
+          const val = qty * cost;
+          if (!locMap[loc]) {
+            locMap[loc] = { name: loc, units: 0, valuation: 0, itemsCount: 0 };
+          }
+          locMap[loc].units += qty;
+          locMap[loc].valuation += val;
+          locMap[loc].itemsCount += 1;
+
+          grandTotalUnits += qty;
+          grandTotalValuation += val;
+        }
       }
-      locMap[loc].units += stock;
-      locMap[loc].valuation += val;
-      locMap[loc].itemsCount += 1;
-      locMap[loc].items.push({ name: prod.name, stock, unit: prod.unit || 'pcs' });
-
-      grandTotalUnits += stock;
-      grandTotalValuation += val;
     }
 
     const locations = Object.values(locMap);
@@ -207,7 +249,7 @@ const InventoryModule = {
             ${loc.units} units <span style="font-size: 11.5px; font-weight: 600; color: var(--color-purple);">(${window.UI.formatCurrency(loc.valuation)})</span>
           </div>
           <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 1px;">
-            ${loc.itemsCount} product ${loc.itemsCount === 1 ? 'type' : 'types'}
+            ${loc.itemsCount} product ${loc.itemsCount === 1 ? 'variety' : 'varieties'}
           </div>
         </div>
       `;
@@ -227,10 +269,18 @@ const InventoryModule = {
     const locSelect = document.getElementById('inventoryLocationFilter');
     if (!locSelect) return;
 
-    const locations = Array.from(new Set(products.map(p => p.location || 'Main Storage'))).sort();
+    const locSet = new Set();
+    for (const p of products) {
+      const locStocks = p.locationStocks || { [p.location || 'Varun']: Number(p.stock) || 0 };
+      for (const [l, q] of Object.entries(locStocks)) {
+        if (Number(q) > 0) locSet.add(l);
+      }
+    }
+
+    const locations = Array.from(locSet).sort();
     const currentVal = this.selectedLocation;
 
-    locSelect.innerHTML = `<option value="ALL">📍 All Locations (${products.length} products)</option>` +
+    locSelect.innerHTML = `<option value="ALL">📍 All Locations</option>` +
       locations.map(l => `<option value="${l}" ${l === currentVal ? 'selected' : ''}>📍 ${l}</option>`).join('');
   },
 
@@ -243,6 +293,99 @@ const InventoryModule = {
 
     catSelect.innerHTML = `<option value="ALL">All Categories (${products.length})</option>` +
       categories.map(c => `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c}</option>`).join('');
+  },
+
+  // -------------------------------------------------------------
+  // 1-CLICK STOCK SHIFT / LOCATION TRANSFER MODAL
+  // -------------------------------------------------------------
+  openTransferModal(productId) {
+    const state = window.Store.getState();
+    const prod = (state.products || []).find(p => p.id === productId);
+    if (!prod) return;
+
+    document.getElementById('transferProdId').value = prod.id;
+    document.getElementById('transferProdTitle').innerText = `Shift stock for "${prod.name}" (Cost: ${window.UI.formatCurrency(prod.costPrice)})`;
+    document.getElementById('transferDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('transferNotes').value = '';
+
+    const locStocks = prod.locationStocks || { [prod.location || 'Varun']: Number(prod.stock) || 0 };
+    const fromSelect = document.getElementById('transferFromLocationSelect');
+    const toSelect = document.getElementById('transferToLocationSelect');
+
+    const availableEntries = Object.entries(locStocks).filter(([_, qty]) => Number(qty) > 0);
+
+    if (availableEntries.length === 0) {
+      window.UI.showToast(`No available stock in hand for "${prod.name}" to move.`, 'warning');
+      return;
+    }
+
+    // Populate From Select
+    fromSelect.innerHTML = availableEntries.map(([loc, qty]) => `
+      <option value="${loc}" data-qty="${qty}">📍 ${loc} (${qty} ${prod.unit || 'pcs'} available)</option>
+    `).join('');
+
+    // Populate To Select (all partners + custom)
+    const partners = state.partners || [];
+    const allKnownLocations = Array.from(new Set([
+      ...partners.map(p => p.name),
+      'Storefront',
+      'Warehouse A',
+      'Warehouse B',
+      'Office'
+    ]));
+
+    const firstFrom = availableEntries[0][0];
+    toSelect.innerHTML = allKnownLocations.map(loc => `
+      <option value="${loc}" ${loc !== firstFrom ? 'selected' : ''}>📍 ${loc}</option>
+    `).join('');
+
+    this.onTransferFromChange();
+    window.UI.openModal('stockTransferModal');
+  },
+
+  onTransferFromChange() {
+    const fromSelect = document.getElementById('transferFromLocationSelect');
+    if (!fromSelect) return;
+
+    const selectedOption = fromSelect.options[fromSelect.selectedIndex];
+    const availableQty = selectedOption ? parseInt(selectedOption.getAttribute('data-qty'), 10) || 0 : 0;
+
+    const qtyInput = document.getElementById('transferQuantity');
+    const hint = document.getElementById('transferAvailableHint');
+
+    if (qtyInput) {
+      qtyInput.max = availableQty;
+      qtyInput.value = Math.min(1, availableQty);
+    }
+    if (hint) {
+      hint.innerText = `Available to move: ${availableQty} pcs`;
+    }
+  },
+
+  handleTransferStock(formData) {
+    const productId = formData.get('productId');
+    const fromLocation = formData.get('fromLocation');
+    const toLocation = formData.get('toLocation')?.trim();
+    const quantity = parseInt(formData.get('quantity'), 10) || 0;
+    const notes = formData.get('notes')?.trim() || '';
+
+    if (!productId || !fromLocation || !toLocation || quantity <= 0) {
+      window.UI.showToast('Please specify valid source, destination, and quantity.', 'danger');
+      return;
+    }
+
+    if (fromLocation === toLocation) {
+      window.UI.showToast('Source location and destination location must be different.', 'danger');
+      return;
+    }
+
+    const success = window.Store.transferProductStock(productId, fromLocation, toLocation, quantity, notes);
+    if (success) {
+      window.UI.closeModal('stockTransferModal');
+      window.UI.showToast(`Shifted ${quantity} pcs from 📍 ${fromLocation} → 📍 ${toLocation}!`, 'success');
+    } else {
+      window.UI.showToast('Unable to complete stock shift. Insufficient units available.', 'danger');
+    }
   },
 
   openAddModal() {
@@ -260,7 +403,7 @@ const InventoryModule = {
     document.getElementById('editProdSku').value = prod.sku || '';
     document.getElementById('editProdName').value = prod.name || '';
     document.getElementById('editProdCategory').value = prod.category || '';
-    document.getElementById('editProdLocation').value = prod.location || 'Warehouse A';
+    document.getElementById('editProdLocation').value = prod.location || 'Varun';
     document.getElementById('editProdUnit').value = prod.unit || 'pcs';
     document.getElementById('editProdCost').value = prod.costPrice || 0;
     document.getElementById('editProdStock').value = prod.stock || 0;
@@ -269,24 +412,11 @@ const InventoryModule = {
     window.UI.openModal('editProductModal');
   },
 
-  openAdjustStockModal(productId) {
-    const state = window.Store.getState();
-    const prod = (state.products || []).find(p => p.id === productId);
-    if (!prod) return;
-
-    document.getElementById('adjustProdId').value = prod.id;
-    document.getElementById('adjustProdName').innerText = `${prod.name} (Location: ${prod.location || 'Main Storage'} · Current: ${prod.stock} ${prod.unit || 'pcs'})`;
-    document.getElementById('adjustDeltaQty').value = '';
-    document.getElementById('adjustReason').value = 'Physical Stock Audit Correction';
-
-    window.UI.openModal('adjustStockModal');
-  },
-
   handleAddProduct(formData) {
     const sku = formData.get('sku')?.trim() || `SKU-${Date.now().toString().slice(-4)}`;
     const name = formData.get('name')?.trim();
     const category = formData.get('category')?.trim() || 'General';
-    const location = formData.get('location')?.trim() || 'Warehouse A';
+    const location = formData.get('location')?.trim() || 'Varun';
     const unit = formData.get('unit')?.trim() || 'pcs';
     const costPrice = parseFloat(formData.get('costPrice')) || 0;
     const initialStock = parseInt(formData.get('initialStock'), 10) || 0;
@@ -304,7 +434,7 @@ const InventoryModule = {
       location,
       unit,
       costPrice,
-      sellingPrice: 0, // selling prices are entered per sale
+      sellingPrice: 0,
       stock: initialStock,
       minThreshold
     });
@@ -318,7 +448,7 @@ const InventoryModule = {
     const sku = formData.get('sku')?.trim();
     const name = formData.get('name')?.trim();
     const category = formData.get('category')?.trim() || 'General';
-    const location = formData.get('location')?.trim() || 'Warehouse A';
+    const location = formData.get('location')?.trim() || 'Varun';
     const unit = formData.get('unit')?.trim() || 'pcs';
     const costPrice = parseFloat(formData.get('costPrice')) || 0;
     const stock = parseInt(formData.get('stock'), 10) || 0;

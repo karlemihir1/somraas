@@ -451,11 +451,13 @@ class StateStore {
           if (!this.state.auditLogs) this.state.auditLogs = [];
           if (!this.state.expenseCategories) this.state.expenseCategories = DEFAULT_INITIAL_STATE.expenseCategories;
           if (currentActiveUser) this.state.activeUser = currentActiveUser;
+          this.normalizeAndMergeDuplicateProducts();
           try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); } catch (e) {}
           this.notify();
           this.updateSyncBadge('online');
         } else {
           // Cloud database is empty or local state has the user's data -> push local data to cloud!
+          this.normalizeAndMergeDuplicateProducts();
           this.syncToServer();
         }
       })
@@ -734,16 +736,83 @@ class StateStore {
     this.saveState();
   }
 
-  // Products & Stock (with Location Tracking)
+  // Products & Stock (Multi-Location & Partner Stock Holdings)
+  normalizeAndMergeDuplicateProducts() {
+    if (!this.state.products || !Array.isArray(this.state.products)) return;
+
+    const mergedProducts = [];
+    const nameMap = {};
+    const idRedirectMap = {};
+    let didMerge = false;
+
+    for (const p of this.state.products) {
+      // Ensure locationStocks object exists
+      if (!p.locationStocks || typeof p.locationStocks !== 'object') {
+        p.locationStocks = {};
+        const loc = p.location || 'Main Storage';
+        p.locationStocks[loc] = Number(p.stock) || 0;
+      }
+
+      const normName = p.name.trim().toLowerCase();
+
+      if (nameMap[normName] !== undefined) {
+        // Duplicate found! Merge into existing product
+        didMerge = true;
+        const target = mergedProducts[nameMap[normName]];
+        idRedirectMap[p.id] = target.id;
+
+        // Merge locationStocks
+        for (const [loc, qty] of Object.entries(p.locationStocks)) {
+          target.locationStocks[loc] = (target.locationStocks[loc] || 0) + (Number(qty) || 0);
+        }
+
+        // Recalculate total stock
+        target.stock = Object.values(target.locationStocks).reduce((a, b) => a + b, 0);
+
+        // Keep highest/latest cost price if available
+        if (p.costPrice && !target.costPrice) target.costPrice = p.costPrice;
+      } else {
+        nameMap[normName] = mergedProducts.length;
+        // Recalculate total stock from locationStocks
+        p.stock = Object.values(p.locationStocks).reduce((a, b) => a + b, 0);
+        mergedProducts.push(p);
+      }
+    }
+
+    if (didMerge) {
+      this.state.products = mergedProducts;
+      // Remap any transactions referencing merged IDs
+      if (this.state.transactions && Array.isArray(this.state.transactions)) {
+        for (const tx of this.state.transactions) {
+          if (tx.items && Array.isArray(tx.items)) {
+            for (const item of tx.items) {
+              if (idRedirectMap[item.productId]) {
+                item.productId = idRedirectMap[item.productId];
+              }
+            }
+          }
+        }
+      }
+      this.logActivity('CATALOG CLEANED', 'Auto-merged duplicate product entries across locations into unified stock holdings.');
+    }
+  }
+
   addProduct(product) {
     product.id = product.id || 'prod_' + Date.now();
     product.createdAt = product.createdAt || new Date().toISOString().split('T')[0];
-    product.location = product.location || 'Warehouse A';
+    const initLocation = product.location || 'Varun';
     product.stock = Number(product.stock) || 0;
     product.costPrice = Number(product.costPrice) || 0;
     product.minThreshold = Number(product.minThreshold) || 5;
+
+    if (!product.locationStocks || typeof product.locationStocks !== 'object') {
+      product.locationStocks = {};
+      product.locationStocks[initLocation] = product.stock;
+    }
+
     this.state.products.push(product);
-    this.logActivity('ITEM CREATED', `Added product "${product.name}" at location "${product.location}" (Stock: ${product.stock} ${product.unit || 'pcs'})`);
+    this.normalizeAndMergeDuplicateProducts();
+    this.logActivity('ITEM CREATED', `Added product "${product.name}" with stock at "${initLocation}" (Stock: ${product.stock} ${product.unit || 'pcs'})`);
     this.saveState();
     return product;
   }
@@ -752,24 +821,53 @@ class StateStore {
     const idx = this.state.products.findIndex(p => p.id === productId);
     if (idx !== -1) {
       const old = this.state.products[idx];
-      const newStock = updatedData.stock !== undefined ? Number(updatedData.stock) : old.stock;
       const newCost = updatedData.costPrice !== undefined ? Number(updatedData.costPrice) : old.costPrice;
-      const newLocation = updatedData.location !== undefined ? updatedData.location : (old.location || 'Warehouse A');
+
+      let locationStocks = updatedData.locationStocks ? { ...updatedData.locationStocks } : (old.locationStocks ? { ...old.locationStocks } : {});
+      
+      if (updatedData.stock !== undefined && !updatedData.locationStocks) {
+        // If updating stock directly, put into primary location
+        const loc = old.location || Object.keys(locationStocks)[0] || 'Varun';
+        locationStocks = { [loc]: Number(updatedData.stock) };
+      }
+
+      const totalStock = Object.values(locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
 
       this.state.products[idx] = {
         ...this.state.products[idx],
         ...updatedData,
-        location: newLocation,
-        stock: newStock,
-        costPrice: newCost
+        costPrice: newCost,
+        locationStocks,
+        stock: totalStock
       };
 
-      const locChange = old.location !== newLocation ? `, Location: "${old.location}" → "${newLocation}"` : '';
-      this.logActivity('ITEM EDITED', `Edited "${old.name}": Cost: ₹${newCost}, Stock: ${newStock}${locChange}`);
+      this.logActivity('ITEM EDITED', `Edited "${old.name}": Cost: ₹${newCost}, Total Stock: ${totalStock}`);
       this.saveState();
       return this.state.products[idx];
     }
     return null;
+  }
+
+  transferProductStock(productId, fromLocation, toLocation, quantity, notes = '') {
+    const prod = this.state.products.find(p => p.id === productId);
+    if (!prod) return false;
+
+    if (!prod.locationStocks) {
+      prod.locationStocks = { [prod.location || 'Varun']: Number(prod.stock) || 0 };
+    }
+
+    const available = Number(prod.locationStocks[fromLocation]) || 0;
+    const qty = Number(quantity) || 0;
+
+    if (qty <= 0) return false;
+
+    prod.locationStocks[fromLocation] = Math.max(0, available - qty);
+    prod.locationStocks[toLocation] = (Number(prod.locationStocks[toLocation]) || 0) + qty;
+    prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+
+    this.logActivity('STOCK SHIFTED', `Transferred ${qty}x "${prod.name}" from 📍 ${fromLocation} → 📍 ${toLocation} (${notes || 'Location Shift'})`);
+    this.saveState();
+    return true;
   }
 
   deleteProduct(productId) {
