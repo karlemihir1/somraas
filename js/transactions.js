@@ -851,6 +851,18 @@ const TransactionsModule = {
       }
     }
 
+    const locSelect = document.getElementById('restockLocationSelect');
+    if (locSelect) {
+      const partners = state.partners || [];
+      const allKnownLocations = Array.from(new Set([
+        ...partners.map(p => p.name),
+        'Storefront',
+        'Warehouse A',
+        'Warehouse B'
+      ]));
+      locSelect.innerHTML = allKnownLocations.map(l => `<option value="${l}">📍 ${l}</option>`).join('');
+    }
+
     this.calculateRestockTotal();
     window.UI.openModal('restockModal');
   },
@@ -881,6 +893,7 @@ const TransactionsModule = {
 
   handleRestockSubmit(formData) {
     const productId = formData.get('productId');
+    const location = formData.get('location') || 'Varun';
     const vendor = formData.get('vendor')?.trim() || 'General Supplier';
     const quantity = parseInt(formData.get('quantity'), 10) || 0;
     const unitCost = parseFloat(formData.get('unitCost')) || 0;
@@ -899,20 +912,21 @@ const TransactionsModule = {
       type: 'PURCHASE',
       date,
       vendor,
+      location,
       holdingPartnerId: null,
       holdingPartnerName: 'Inventory Pool',
       category: 'Inventory Restock',
-      description: `Restocked ${quantity}x ${prod.name} from ${vendor}`,
+      description: `Restocked ${quantity}x ${prod.name} from ${vendor} (📍 ${location})`,
       amount: totalCost,
       cogs: 0,
       stockImpact: quantity,
-      items: [{ productId: prod.id, productName: prod.name, quantity, unitCost, totalCost }],
+      items: [{ productId: prod.id, productName: prod.name, quantity, unitCost, totalCost, location }],
       notes
     });
 
     window.Store.updateProduct(prod.id, { costPrice: unitCost });
     window.UI.closeModal('restockModal');
-    window.UI.showToast(`Restocked ${quantity} units of "${prod.name}" successfully!`);
+    window.UI.showToast(`Restocked ${quantity} units of "${prod.name}" at 📍 ${location} successfully!`, 'success');
   },
 
   // Edit Restock
@@ -928,9 +942,21 @@ const TransactionsModule = {
 
     if (prodSelect) {
       prodSelect.innerHTML = (state.products || []).map(p => {
-        const loc = p.location ? ` [📍 ${p.location}]` : '';
-        return `<option value="${p.id}" ${p.id === firstItem.productId ? 'selected' : ''}>${p.name} (Current: ${p.stock})${loc}</option>`;
+        return `<option value="${p.id}" ${p.id === firstItem.productId ? 'selected' : ''}>${p.name} (Current: ${p.stock || 0} pcs)</option>`;
       }).join('');
+    }
+
+    const locSelect = document.getElementById('editRestockLocationSelect');
+    if (locSelect) {
+      const partners = state.partners || [];
+      const allKnownLocations = Array.from(new Set([
+        ...partners.map(p => p.name),
+        'Storefront',
+        'Warehouse A',
+        'Warehouse B'
+      ]));
+      const currentLoc = tx.location || firstItem.location || 'Varun';
+      locSelect.innerHTML = allKnownLocations.map(l => `<option value="${l}" ${l === currentLoc ? 'selected' : ''}>📍 ${l}</option>`).join('');
     }
 
     document.getElementById('editRestockQty').value = firstItem.quantity || 1;
@@ -943,6 +969,7 @@ const TransactionsModule = {
   handleEditRestockSubmit(formData) {
     const txId = formData.get('id');
     const productId = formData.get('productId');
+    const location = formData.get('location') || 'Varun';
     const vendor = formData.get('vendor')?.trim() || 'General Supplier';
     const quantity = parseInt(formData.get('quantity'), 10) || 0;
     const unitCost = parseFloat(formData.get('unitCost')) || 0;
@@ -954,12 +981,13 @@ const TransactionsModule = {
 
     window.Store.updateTransaction(txId, {
       vendor,
+      location,
       date,
       notes,
-      description: `Restocked ${quantity}x ${prod ? prod.name : 'Item'} from ${vendor}`,
+      description: `Restocked ${quantity}x ${prod ? prod.name : 'Item'} from ${vendor} (📍 ${location})`,
       amount: totalCost,
       stockImpact: quantity,
-      items: [{ productId, productName: prod ? prod.name : 'Product', quantity, unitCost, totalCost }]
+      items: [{ productId, productName: prod ? prod.name : 'Product', quantity, unitCost, totalCost, location }]
     });
 
     window.UI.closeModal('editRestockModal');

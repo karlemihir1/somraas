@@ -749,8 +749,13 @@ class StateStore {
       // Ensure locationStocks object exists
       if (!p.locationStocks || typeof p.locationStocks !== 'object') {
         p.locationStocks = {};
-        const loc = p.location || 'Main Storage';
-        p.locationStocks[loc] = Number(p.stock) || 0;
+      }
+
+      // If locationStocks is empty or sums to 0 but p.stock > 0, initialize it from p.location
+      const existingSum = Object.values(p.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+      if (existingSum === 0 && Number(p.stock) > 0) {
+        const loc = p.location || 'Varun';
+        p.locationStocks[loc] = Number(p.stock);
       }
 
       const normName = p.name.trim().toLowerCase();
@@ -767,14 +772,14 @@ class StateStore {
         }
 
         // Recalculate total stock
-        target.stock = Object.values(target.locationStocks).reduce((a, b) => a + b, 0);
+        target.stock = Object.values(target.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
 
         // Keep highest/latest cost price if available
         if (p.costPrice && !target.costPrice) target.costPrice = p.costPrice;
       } else {
         nameMap[normName] = mergedProducts.length;
         // Recalculate total stock from locationStocks
-        p.stock = Object.values(p.locationStocks).reduce((a, b) => a + b, 0);
+        p.stock = Object.values(p.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
         mergedProducts.push(p);
       }
     }
@@ -903,12 +908,22 @@ class StateStore {
     if (tx.type === 'SALE' && tx.items && tx.items.length > 0) {
       for (const item of tx.items) {
         const prod = this.state.products.find(p => p.id === item.productId);
-        if (prod) prod.stock = Math.max(0, (prod.stock || 0) - Number(item.quantity));
+        if (prod) {
+          if (!prod.locationStocks) prod.locationStocks = {};
+          const targetLoc = item.location || tx.location || Object.keys(prod.locationStocks)[0] || prod.location || 'Varun';
+          prod.locationStocks[targetLoc] = Math.max(0, (Number(prod.locationStocks[targetLoc]) || 0) - Number(item.quantity));
+          prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+        }
       }
     } else if (tx.type === 'PURCHASE' && tx.items && tx.items.length > 0) {
       for (const item of tx.items) {
         const prod = this.state.products.find(p => p.id === item.productId);
-        if (prod) prod.stock = (prod.stock || 0) + Number(item.quantity);
+        if (prod) {
+          if (!prod.locationStocks) prod.locationStocks = {};
+          const targetLoc = item.location || tx.location || prod.location || 'Varun';
+          prod.locationStocks[targetLoc] = (Number(prod.locationStocks[targetLoc]) || 0) + Number(item.quantity);
+          prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+        }
       }
     }
 
@@ -925,29 +940,51 @@ class StateStore {
 
     const oldTx = this.state.transactions[idx];
 
+    // Revert old transaction stock impact
     if (oldTx.type === 'SALE' && oldTx.items) {
       for (const item of oldTx.items) {
         const prod = this.state.products.find(p => p.id === item.productId);
-        if (prod) prod.stock += Number(item.quantity);
+        if (prod) {
+          if (!prod.locationStocks) prod.locationStocks = {};
+          const targetLoc = item.location || oldTx.location || Object.keys(prod.locationStocks)[0] || prod.location || 'Varun';
+          prod.locationStocks[targetLoc] = (Number(prod.locationStocks[targetLoc]) || 0) + Number(item.quantity);
+          prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+        }
       }
     } else if (oldTx.type === 'PURCHASE' && oldTx.items) {
       for (const item of oldTx.items) {
         const prod = this.state.products.find(p => p.id === item.productId);
-        if (prod) prod.stock = Math.max(0, prod.stock - Number(item.quantity));
+        if (prod) {
+          if (!prod.locationStocks) prod.locationStocks = {};
+          const targetLoc = item.location || oldTx.location || prod.location || 'Varun';
+          prod.locationStocks[targetLoc] = Math.max(0, (Number(prod.locationStocks[targetLoc]) || 0) - Number(item.quantity));
+          prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+        }
       }
     }
 
     const newTx = { ...oldTx, ...updatedTxData, lastEditedBy: this.state.activeUser ? this.state.activeUser.name : 'Staff', lastEditedAt: new Date().toISOString() };
 
+    // Apply new transaction stock impact
     if (newTx.type === 'SALE' && newTx.items) {
       for (const item of newTx.items) {
         const prod = this.state.products.find(p => p.id === item.productId);
-        if (prod) prod.stock = Math.max(0, prod.stock - Number(item.quantity));
+        if (prod) {
+          if (!prod.locationStocks) prod.locationStocks = {};
+          const targetLoc = item.location || newTx.location || Object.keys(prod.locationStocks)[0] || prod.location || 'Varun';
+          prod.locationStocks[targetLoc] = Math.max(0, (Number(prod.locationStocks[targetLoc]) || 0) - Number(item.quantity));
+          prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+        }
       }
     } else if (newTx.type === 'PURCHASE' && newTx.items) {
       for (const item of newTx.items) {
         const prod = this.state.products.find(p => p.id === item.productId);
-        if (prod) prod.stock += Number(item.quantity);
+        if (prod) {
+          if (!prod.locationStocks) prod.locationStocks = {};
+          const targetLoc = item.location || newTx.location || prod.location || 'Varun';
+          prod.locationStocks[targetLoc] = (Number(prod.locationStocks[targetLoc]) || 0) + Number(item.quantity);
+          prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+        }
       }
     }
 
@@ -963,12 +1000,22 @@ class StateStore {
       if (tx.type === 'SALE' && tx.items) {
         for (const item of tx.items) {
           const prod = this.state.products.find(p => p.id === item.productId);
-          if (prod) prod.stock += Number(item.quantity);
+          if (prod) {
+            if (!prod.locationStocks) prod.locationStocks = {};
+            const targetLoc = item.location || tx.location || Object.keys(prod.locationStocks)[0] || prod.location || 'Varun';
+            prod.locationStocks[targetLoc] = (Number(prod.locationStocks[targetLoc]) || 0) + Number(item.quantity);
+            prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+          }
         }
       } else if (tx.type === 'PURCHASE' && tx.items) {
         for (const item of tx.items) {
           const prod = this.state.products.find(p => p.id === item.productId);
-          if (prod) prod.stock = Math.max(0, prod.stock - Number(item.quantity));
+          if (prod) {
+            if (!prod.locationStocks) prod.locationStocks = {};
+            const targetLoc = item.location || tx.location || prod.location || 'Varun';
+            prod.locationStocks[targetLoc] = Math.max(0, (Number(prod.locationStocks[targetLoc]) || 0) - Number(item.quantity));
+            prod.stock = Object.values(prod.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+          }
         }
       }
       this.state.transactions = this.state.transactions.filter(t => t.id !== txId);

@@ -807,6 +807,10 @@
                   <select name="productId" id="restockProductSelect" class="form-control" onchange="TransactionsModule.onRestockProductChange(this.value)" required></select>
                 </div>
                 <div class="form-group">
+                  <label>Receive into Location / Partner</label>
+                  <select name="location" id="restockLocationSelect" class="form-control" required></select>
+                </div>
+                <div class="form-group">
                   <label>Supplier / Vendor</label>
                   <input type="text" name="vendor" class="form-control" placeholder="Vendor / Distributor name" required>
                 </div>
@@ -858,6 +862,10 @@
                 <div class="form-group form-full">
                   <label>Product</label>
                   <select name="productId" id="editRestockProductSelect" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                  <label>Location / Partner</label>
+                  <select name="location" id="editRestockLocationSelect" class="form-control" required></select>
                 </div>
                 <div class="form-group">
                   <label>Supplier / Vendor</label>
@@ -1573,15 +1581,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts with Cache-Busting Version Query -->
-  <script src="js/state.js?v=8.0"></script>
-  <script src="js/accounting.js?v=8.0"></script>
-  <script src="js/ui.js?v=8.0"></script>
-  <script src="js/inventory.js?v=8.0"></script>
-  <script src="js/transactions.js?v=8.0"></script>
-  <script src="js/partners.js?v=8.0"></script>
-  <script src="js/reports.js?v=8.0"></script>
-  <script src="js/audit.js?v=8.0"></script>
-  <script src="js/app.js?v=8.0"></script>
+  <script src="js/state.js?v=9.0"></script>
+  <script src="js/accounting.js?v=9.0"></script>
+  <script src="js/ui.js?v=9.0"></script>
+  <script src="js/inventory.js?v=9.0"></script>
+  <script src="js/transactions.js?v=9.0"></script>
+  <script src="js/partners.js?v=9.0"></script>
+  <script src="js/reports.js?v=9.0"></script>
+  <script src="js/audit.js?v=9.0"></script>
+  <script src="js/app.js?v=9.0"></script>
 
 </body>
 </html>

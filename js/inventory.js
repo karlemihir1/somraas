@@ -459,14 +459,21 @@ const InventoryModule = {
       return;
     }
 
+    const state = window.Store.getState();
+    const oldProd = (state.products || []).find(p => p.id === id);
+    let locationStocks = oldProd && oldProd.locationStocks ? { ...oldProd.locationStocks } : {};
+    const targetLoc = location || oldProd?.location || Object.keys(locationStocks)[0] || 'Varun';
+    locationStocks[targetLoc] = stock;
+
     window.Store.updateProduct(id, {
       sku,
       name,
       category,
-      location,
+      location: targetLoc,
       unit,
       costPrice,
       stock,
+      locationStocks,
       minThreshold
     });
 

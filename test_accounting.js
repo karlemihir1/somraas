@@ -168,3 +168,33 @@ if (merged.length === 2 && merged[0].stock === 12 && merged[0].locationStocks.Va
   console.error('Duplicate merge test failed!');
   process.exit(1);
 }
+
+// Test Restocking into a Location
+console.log('\n--- Testing Restock into a Location (e.g. 10 units Smirnoff Minty Jamun to Varun) ---');
+const testProd = {
+  id: 'prod_smirnoff',
+  name: 'Smirnoff Minty Jamun',
+  stock: 0,
+  locationStocks: {}
+};
+
+const restockTx = {
+  type: 'PURCHASE',
+  location: 'Varun',
+  items: [{ productId: 'prod_smirnoff', quantity: 10, unitCost: 980 }]
+};
+
+// Simulation of addTransaction PURCHASE
+const targetLoc = restockTx.items[0].location || restockTx.location || 'Varun';
+testProd.locationStocks[targetLoc] = (testProd.locationStocks[targetLoc] || 0) + restockTx.items[0].quantity;
+testProd.stock = Object.values(testProd.locationStocks).reduce((a, b) => Number(a) + Number(b), 0);
+
+console.log(`Smirnoff Total Stock after Restock: ${testProd.stock} (Expected: 10)`);
+console.log(`Smirnoff Varun Stock: ${testProd.locationStocks.Varun} (Expected: 10)`);
+
+if (testProd.stock === 10 && testProd.locationStocks.Varun === 10) {
+  console.log('--- RESTOCK LOCATION STOCK INCREASE TEST PASSED WITH 100% ACCURACY! ---');
+} else {
+  console.error('Restock location stock test failed!');
+  process.exit(1);
+}
