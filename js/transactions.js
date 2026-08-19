@@ -833,18 +833,21 @@ const TransactionsModule = {
   openRestockModal() {
     const form = document.getElementById('restockForm');
     if (form) form.reset();
-    document.getElementById('restockDate').value = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('restockDate');
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
     const state = window.Store.getState();
     const prodSelect = document.getElementById('restockProductSelect');
     if (prodSelect) {
       prodSelect.innerHTML = (state.products || []).map(p => {
-        return `<option value="${p.id}">${p.name} (Current: ${p.stock} pcs) - Cost: ₹${p.costPrice.toLocaleString('en-IN')}</option>`;
+        const costVal = p.costPrice != null ? Number(p.costPrice) : 0;
+        return `<option value="${p.id}">${p.name} (Current: ${p.stock || 0} pcs) - Cost: ₹${costVal.toLocaleString('en-IN')}</option>`;
       }).join('');
       
-      const firstProd = state.products[0];
-      if (firstProd) {
-        document.getElementById('restockUnitCost').value = firstProd.costPrice || 0;
+      const firstProd = (state.products || [])[0];
+      const unitCostInput = document.getElementById('restockUnitCost');
+      if (unitCostInput && firstProd) {
+        unitCostInput.value = firstProd.costPrice || 0;
       }
     }
 
