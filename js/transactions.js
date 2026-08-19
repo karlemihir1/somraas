@@ -64,14 +64,6 @@ const TransactionsModule = {
       });
     }
 
-    const stockInvestmentForm = document.getElementById('stockInvestmentForm');
-    if (stockInvestmentForm) {
-      stockInvestmentForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.handleStockInvestmentSubmit(new FormData(stockInvestmentForm));
-      });
-    }
-
     const editRestockForm = document.getElementById('editRestockForm');
     if (editRestockForm) {
       editRestockForm.addEventListener('submit', (e) => {

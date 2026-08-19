@@ -66,11 +66,8 @@
             <button class="btn btn-success" onclick="TransactionsModule.openSaleModal()" title="Record a new customer sale">
               <span>+</span> Sale
             </button>
-            <button class="btn btn-primary" onclick="TransactionsModule.openRestockModal()" title="Record physical stock arrival & units">
-              <span>📦</span> + Restock
-            </button>
-            <button class="btn btn-warning" onclick="TransactionsModule.openStockInvestmentModal()" title="Record partner money/investment paid for stock" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700; color: #fff;">
-              <span>💰</span> + Stock Paid
+            <button class="btn btn-primary" onclick="TransactionsModule.openRestockModal()" title="Record stock brought in and paid by partner">
+              <span>📦</span> + Restock Stock
             </button>
             <button class="btn btn-danger" onclick="TransactionsModule.openExpenseModal()" title="Record business operating expense">
               <span>+</span> Expense
@@ -377,11 +374,8 @@
               </div>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()" title="Add physical stock units">
-                <span>📦</span> + Restock Units
-              </button>
-              <button class="btn btn-warning btn-sm" onclick="TransactionsModule.openStockInvestmentModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700; color: #fff;" title="Record partner money paid for stock">
-                <span>💰</span> + Record Stock Paid
+              <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()" title="Record stock brought in and paid by partner">
+                <span>📦</span> + Buy / Restock Stock
               </button>
               <button class="btn btn-secondary btn-sm" onclick="InventoryModule.openAddModal()">
                 + Add Product
@@ -794,8 +788,8 @@
     <div class="modal-card">
       <div class="modal-header">
         <div class="modal-title-group">
-          <h3>Restock Inventory / Purchase</h3>
-          <div class="modal-subtitle">Increases inventory quantity and records purchase cost in ₹</div>
+          <h3>📦 Partner Stock Purchase & Restock</h3>
+          <div class="modal-subtitle">Records stock brought in and personal money spent by the partner (credited in settlement)</div>
         </div>
         <button class="modal-close-btn" onclick="UI.closeModal('restockModal')">✕</button>
       </div>
@@ -988,106 +982,6 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editRestockModal')">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 2C. ADD STOCK INVESTMENT (WHO PAID FOR STOCK) MODAL -->
-  <div id="stockInvestmentModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <h3>💰 Record Stock Investment / Partner Paid</h3>
-          <div class="modal-subtitle">Record money invested by partners for stock purchase with specific date</div>
-        </div>
-        <button class="modal-close-btn" onclick="UI.closeModal('stockInvestmentModal')">✕</button>
-      </div>
-      <form id="stockInvestmentForm">
-        <div class="modal-body">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Payment / Investment Date</label>
-              <input type="date" name="date" id="stockInvestDate" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label>Linked Product or Supplier (Optional)</label>
-              <select name="linkedProductId" id="stockInvestProductSelect" class="form-control">
-                <option value="">-- General Stock Investment / Batch Pool --</option>
-              </select>
-            </div>
-
-            <div class="form-group form-full" style="background: var(--bg-surface-elevated); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: 700; color: var(--text-primary); margin: 0; font-size: 13px; display: flex; align-items: center; gap: 6px;">
-                  <span>👥</span> Paying Partner(s)
-                </label>
-                <span id="stockInvestStatusBadge" style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); background: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.3);">
-                  Single Payer Mode
-                </span>
-              </div>
-
-              <div style="display: flex; gap: 16px; margin-bottom: 10px;">
-                <label style="font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                  <input type="radio" name="stockInvestMode" value="SINGLE" checked onchange="TransactionsModule.onStockInvestModeToggle('SINGLE')">
-                  Single Partner Paid
-                </label>
-                <label style="font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                  <input type="radio" name="stockInvestMode" value="SPLIT" onchange="TransactionsModule.onStockInvestModeToggle('SPLIT')">
-                  Split Across Multiple Partners
-                </label>
-              </div>
-
-              <!-- Single Partner Mode -->
-              <div id="stockInvestSingleWrapper">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                  <div>
-                    <label style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px; display: block;">Select Partner</label>
-                    <select name="partnerId" id="stockInvestPartnerSelect" class="form-control"></select>
-                  </div>
-                  <div>
-                    <label style="font-size: 11.5px; color: var(--color-warning); font-weight: 700; margin-bottom: 4px; display: block;">Amount Paid (₹)</label>
-                    <input type="number" step="1" min="1" name="singleAmount" id="stockInvestSingleAmount" class="form-control" style="font-weight: 700;" placeholder="Amount in ₹" oninput="TransactionsModule.updateStockInvestSummary()">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Split Multi-Partner Mode -->
-              <div id="stockInvestSplitWrapper" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <span style="font-size: 11.5px; color: var(--text-muted);">Enter amount invested by each partner:</span>
-                  <button type="button" class="btn btn-outline btn-xs" onclick="TransactionsModule.clearStockInvestPayers()">🧹 Clear</button>
-                </div>
-                <div id="stockInvestSplitList" style="display: flex; flex-direction: column; gap: 6px;"></div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Payment Method</label>
-              <select name="paymentMethod" class="form-control">
-                <option value="Personal UPI">Personal UPI (GPay / PhonePe / Paytm)</option>
-                <option value="Personal Bank Transfer">Personal Bank Transfer (IMPS / NEFT)</option>
-                <option value="Personal Cash">Personal Cash</option>
-                <option value="Supplier Advance">Supplier Advance / Cheque</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Purpose / Vendor / Batch Ref</label>
-              <input type="text" name="notes" class="form-control" placeholder="e.g. Advance to Supplier XYZ or Batch #102">
-            </div>
-          </div>
-
-          <div class="order-summary-box">
-            <div class="order-summary-row total">
-              <span>Total Stock Investment / Outflow:</span>
-              <span id="stockInvestTotalPreview" style="color: var(--color-warning); font-weight: 700;">₹0.00</span>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('stockInvestmentModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700;">Record Stock Investment</button>
         </div>
       </form>
     </div>
@@ -1665,15 +1559,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts with Cache-Busting Version Query -->
-  <script src="js/state.js?v=4.0"></script>
-  <script src="js/accounting.js?v=4.0"></script>
-  <script src="js/ui.js?v=4.0"></script>
-  <script src="js/inventory.js?v=4.0"></script>
-  <script src="js/transactions.js?v=4.0"></script>
-  <script src="js/partners.js?v=4.0"></script>
-  <script src="js/reports.js?v=4.0"></script>
-  <script src="js/audit.js?v=4.0"></script>
-  <script src="js/app.js?v=4.0"></script>
+  <script src="js/state.js?v=5.0"></script>
+  <script src="js/accounting.js?v=5.0"></script>
+  <script src="js/ui.js?v=5.0"></script>
+  <script src="js/inventory.js?v=5.0"></script>
+  <script src="js/transactions.js?v=5.0"></script>
+  <script src="js/partners.js?v=5.0"></script>
+  <script src="js/reports.js?v=5.0"></script>
+  <script src="js/audit.js?v=5.0"></script>
+  <script src="js/app.js?v=5.0"></script>
 
 </body>
 </html>
