@@ -110,7 +110,7 @@ const AccountingEngine = {
         partnerSummaries[holdingPartner].salesCollected += amount;
       } else if (tx.type === 'EXPENSE' && holdingPartner && partnerSummaries[holdingPartner]) {
         partnerSummaries[holdingPartner].expensesPaid += amount;
-      } else if (tx.type === 'PURCHASE') {
+      } else if (tx.type === 'PURCHASE' || tx.type === 'STOCK_INVESTMENT') {
         if (tx.payers && Array.isArray(tx.payers) && tx.payers.length > 0) {
           for (const payer of tx.payers) {
             const pId = payer.partnerId;

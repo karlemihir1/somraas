@@ -64,6 +64,14 @@ const TransactionsModule = {
       });
     }
 
+    const stockInvestmentForm = document.getElementById('stockInvestmentForm');
+    if (stockInvestmentForm) {
+      stockInvestmentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleStockInvestmentSubmit(new FormData(stockInvestmentForm));
+      });
+    }
+
     const editRestockForm = document.getElementById('editRestockForm');
     if (editRestockForm) {
       editRestockForm.addEventListener('submit', (e) => {
@@ -181,6 +189,11 @@ const TransactionsModule = {
           cashClass = 'color: var(--color-danger); font-weight: 700;';
           cashPrefix = '-';
           break;
+        case 'STOCK_INVESTMENT':
+          typeBadge = '<span class="badge" style="background: rgba(245, 158, 11, 0.18); color: var(--color-warning); border: 1px solid var(--color-warning); font-weight: 700;">💰 STOCK PAID</span>';
+          cashClass = 'color: var(--color-warning); font-weight: 700;';
+          cashPrefix = '-';
+          break;
         case 'EXPENSE':
           typeBadge = '<span class="badge badge-expense">EXPENSE</span>';
           cashClass = 'color: var(--color-danger); font-weight: 700;';
@@ -218,6 +231,13 @@ const TransactionsModule = {
       let accountBadge = '';
       if (tx.type === 'SALE' && tx.holdingPartnerName) {
         accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(16, 185, 129, 0.1); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💰 Received in: <strong>${tx.holdingPartnerName}'s Account</strong></span>`;
+      } else if (tx.type === 'STOCK_INVESTMENT') {
+        if (tx.payers && Array.isArray(tx.payers) && tx.payers.length > 0) {
+          const payerStr = tx.payers.map(p => `<strong>${p.partnerName}</strong> (₹${Number(p.amount).toLocaleString('en-IN')})`).join(' + ');
+          accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(245, 158, 11, 0.12); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💰 Paid by: ${payerStr}</span>`;
+        } else if (tx.holdingPartnerName) {
+          accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(245, 158, 11, 0.12); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💰 Paid by: <strong>${tx.holdingPartnerName}</strong></span>`;
+        }
       } else if (tx.type === 'PURCHASE') {
         if (tx.payers && Array.isArray(tx.payers) && tx.payers.length > 0) {
           const payerStr = tx.payers.map(p => `<strong>${p.partnerName}</strong> (₹${Number(p.amount).toLocaleString('en-IN')})`).join(' + ');
@@ -1333,6 +1353,204 @@ const TransactionsModule = {
 
     window.UI.closeModal('editRestockModal');
     window.UI.showToast(`Restock entry updated.`);
+  },
+
+  // -------------------------------------------------------------
+  // STOCK INVESTMENT / PARTNER PAID FOR STOCK WORKFLOW
+  // -------------------------------------------------------------
+  openStockInvestmentModal() {
+    const form = document.getElementById('stockInvestmentForm');
+    if (form) form.reset();
+    document.getElementById('stockInvestDate').value = new Date().toISOString().split('T')[0];
+
+    const state = window.Store.getState();
+    const partners = state.partners || [];
+    const products = state.products || [];
+
+    // Populate Partner Select
+    const pSelect = document.getElementById('stockInvestPartnerSelect');
+    if (pSelect) {
+      pSelect.innerHTML = partners.map(p => `<option value="${p.id}">${p.name} (${p.role || 'Partner'})</option>`).join('');
+    }
+
+    // Populate Optional Linked Product Select
+    const prodSelect = document.getElementById('stockInvestProductSelect');
+    if (prodSelect) {
+      prodSelect.innerHTML = '<option value="">-- General Stock Investment / Supplier Pool --</option>' +
+        products.map(p => `<option value="${p.id}">📦 ${p.name} (Current Stock: ${p.stock})</option>`).join('');
+    }
+
+    // Initialize mode
+    const singleRadio = document.querySelector('input[name="stockInvestMode"][value="SINGLE"]');
+    if (singleRadio) singleRadio.checked = true;
+    this.onStockInvestModeToggle('SINGLE');
+    this.populateStockInvestSplitList();
+    this.updateStockInvestSummary();
+
+    window.UI.openModal('stockInvestmentModal');
+  },
+
+  populateStockInvestSplitList(defaultPayers = []) {
+    const container = document.getElementById('stockInvestSplitList');
+    if (!container) return;
+
+    const state = window.Store.getState();
+    const partners = state.partners || [];
+
+    const defaultMap = {};
+    for (const dp of defaultPayers) {
+      defaultMap[dp.partnerId] = dp.amount;
+    }
+
+    container.innerHTML = partners.map(partner => {
+      const initVal = defaultMap[partner.id] !== undefined ? defaultMap[partner.id] : '';
+      return `
+        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--color-warning); color: #000; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+              ${partner.name[0].toUpperCase()}
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${partner.name}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">${partner.role || 'Partner'} (${partner.profitShareRatio}%)</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">₹</span>
+            <input type="number" step="1" min="0" id="stockInvestPayerAmt_${partner.id}" data-partner-id="${partner.id}" data-partner-name="${partner.name}" class="form-control" style="width: 130px; font-weight: 700; text-align: right;" value="${initVal}" placeholder="0" oninput="TransactionsModule.updateStockInvestSummary()">
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  onStockInvestModeToggle(mode) {
+    const singleWrap = document.getElementById('stockInvestSingleWrapper');
+    const splitWrap = document.getElementById('stockInvestSplitWrapper');
+    const badge = document.getElementById('stockInvestStatusBadge');
+
+    if (mode === 'SINGLE') {
+      if (singleWrap) singleWrap.style.display = 'block';
+      if (splitWrap) splitWrap.style.display = 'none';
+      if (badge) {
+        badge.innerHTML = 'Single Payer Mode';
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.color = 'var(--color-success)';
+      }
+    } else {
+      if (singleWrap) singleWrap.style.display = 'none';
+      if (splitWrap) splitWrap.style.display = 'block';
+      if (badge) {
+        badge.innerHTML = 'Multi-Partner Split Mode';
+        badge.style.background = 'rgba(245, 158, 11, 0.15)';
+        badge.style.color = 'var(--color-warning)';
+      }
+    }
+    this.updateStockInvestSummary();
+  },
+
+  clearStockInvestPayers() {
+    const state = window.Store.getState();
+    (state.partners || []).forEach(p => {
+      const input = document.getElementById(`stockInvestPayerAmt_${p.id}`);
+      if (input) input.value = '';
+    });
+    this.updateStockInvestSummary();
+  },
+
+  updateStockInvestSummary() {
+    const mode = document.querySelector('input[name="stockInvestMode"]:checked')?.value || 'SINGLE';
+    let total = 0;
+
+    if (mode === 'SINGLE') {
+      total = parseFloat(document.getElementById('stockInvestSingleAmount')?.value) || 0;
+    } else {
+      const inputs = document.querySelectorAll('#stockInvestSplitList input[data-partner-id]');
+      inputs.forEach(inp => {
+        total += (parseFloat(inp.value) || 0);
+      });
+    }
+
+    const previewEl = document.getElementById('stockInvestTotalPreview');
+    if (previewEl) previewEl.innerText = window.UI.formatCurrency(total);
+  },
+
+  handleStockInvestmentSubmit(formData) {
+    const date = formData.get('date') || new Date().toISOString().split('T')[0];
+    const linkedProductId = formData.get('linkedProductId');
+    const paymentMethod = formData.get('paymentMethod') || 'Personal Bank Transfer';
+    const notes = formData.get('notes')?.trim() || '';
+    const mode = document.querySelector('input[name="stockInvestMode"]:checked')?.value || 'SINGLE';
+
+    const state = window.Store.getState();
+    const prod = linkedProductId ? state.products.find(p => p.id === linkedProductId) : null;
+
+    let payers = [];
+    let holdingPartnerId = null;
+    let holdingPartnerName = 'Personal Account';
+    let totalAmount = 0;
+    let payerDescription = '';
+
+    if (mode === 'SINGLE') {
+      holdingPartnerId = formData.get('partnerId');
+      totalAmount = parseFloat(formData.get('singleAmount')) || 0;
+      const partner = state.partners.find(p => p.id === holdingPartnerId) || state.partners[0];
+      if (partner) {
+        holdingPartnerId = partner.id;
+        holdingPartnerName = partner.name;
+        payers = [{ partnerId: partner.id, partnerName: partner.name, amount: totalAmount }];
+        payerDescription = `Paid by ${partner.name}`;
+      }
+    } else {
+      const inputs = document.querySelectorAll('#stockInvestSplitList input[data-partner-id]');
+      inputs.forEach(inp => {
+        const amt = parseFloat(inp.value) || 0;
+        if (amt > 0) {
+          payers.push({
+            partnerId: inp.getAttribute('data-partner-id'),
+            partnerName: inp.getAttribute('data-partner-name'),
+            amount: amt
+          });
+          totalAmount += amt;
+        }
+      });
+
+      if (payers.length === 1) {
+        holdingPartnerId = payers[0].partnerId;
+        holdingPartnerName = payers[0].partnerName;
+        payerDescription = `Paid by ${payers[0].partnerName}`;
+      } else {
+        holdingPartnerId = payers[0]?.partnerId || null;
+        holdingPartnerName = 'Multiple Partners (Split)';
+        payerDescription = `Paid by: ` + payers.map(p => `${p.partnerName} (₹${p.amount.toLocaleString('en-IN')})`).join(' + ');
+      }
+    }
+
+    if (totalAmount <= 0) {
+      window.UI.showToast('Please enter a valid investment amount greater than ₹0.', 'danger');
+      return;
+    }
+
+    const prodLabel = prod ? ` for "${prod.name}"` : ' (Inventory Purchase Fund)';
+
+    window.Store.addTransaction({
+      type: 'STOCK_INVESTMENT',
+      date,
+      partnerId: holdingPartnerId,
+      holdingPartnerId,
+      holdingPartnerName,
+      payers,
+      category: 'Stock Investment',
+      description: `Stock Investment${prodLabel} - ${payerDescription}`,
+      amount: totalAmount,
+      cogs: 0,
+      stockImpact: 0,
+      paymentMethod,
+      notes
+    });
+
+    window.UI.closeModal('stockInvestmentModal');
+    window.UI.showToast(`Stock investment of ${window.UI.formatCurrency(totalAmount)} recorded successfully!`);
   },
 
   // -------------------------------------------------------------

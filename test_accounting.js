@@ -79,3 +79,24 @@ if (aarav.restocksPaid === 35000 && rohan.restocksPaid === 25000) {
   console.error('Split test failed!');
   process.exit(1);
 }
+
+// Test Independent STOCK_INVESTMENT on separate date
+console.log('\n--- Testing Independent STOCK_INVESTMENT on Separate Date ---');
+const investState = JSON.parse(JSON.stringify(mockState));
+investState.transactions.push({
+  type: 'STOCK_INVESTMENT',
+  date: '2026-08-10',
+  amount: 50000,
+  holdingPartnerId: 'partner_rohan'
+});
+
+const investReport = AccountingEngine.calculateFinancials(investState, 'ALL');
+const rohanInvest = investReport.partnerSummaries.find(p => p.partnerId === 'partner_rohan');
+
+console.log(`Rohan stock investment credited: ₹${rohanInvest.restocksPaid} (Expected: 50,000)`);
+if (rohanInvest.restocksPaid === 50000) {
+  console.log('--- INDEPENDENT STOCK INVESTMENT ON SEPARATE DATES VERIFIED 100% ACCURATELY! ---');
+} else {
+  console.error('Stock investment test failed!');
+  process.exit(1);
+}
