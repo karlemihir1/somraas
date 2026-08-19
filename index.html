@@ -66,8 +66,11 @@
             <button class="btn btn-success" onclick="TransactionsModule.openSaleModal()" title="Record a new customer sale">
               <span>+</span> Sale
             </button>
-            <button class="btn btn-primary" onclick="TransactionsModule.openRestockModal()" title="Record stock purchase & who paid how much" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700;">
-              <span>📦</span> + Stock & Who Paid
+            <button class="btn btn-primary" onclick="TransactionsModule.openRestockModal()" title="Record physical stock arrival & units">
+              <span>📦</span> + Restock
+            </button>
+            <button class="btn btn-warning" onclick="TransactionsModule.openStockInvestmentModal()" title="Record partner money/investment paid for stock" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700; color: #fff;">
+              <span>💰</span> + Stock Paid
             </button>
             <button class="btn btn-danger" onclick="TransactionsModule.openExpenseModal()" title="Record business operating expense">
               <span>+</span> Expense
@@ -374,8 +377,11 @@
               </div>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700;">
-                <span>📦</span> + Stock Purchase & Who Paid
+              <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()" title="Add physical stock units">
+                <span>📦</span> + Restock Units
+              </button>
+              <button class="btn btn-warning btn-sm" onclick="TransactionsModule.openStockInvestmentModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 700; color: #fff;" title="Record partner money paid for stock">
+                <span>💰</span> + Record Stock Paid
               </button>
               <button class="btn btn-secondary btn-sm" onclick="InventoryModule.openAddModal()">
                 + Add Product
