@@ -100,3 +100,30 @@ if (rohanInvest.restocksPaid === 50000) {
   console.error('Stock investment test failed!');
   process.exit(1);
 }
+
+// Test STOCK_CONTRIBUTION with multi-partner payers
+console.log('\n--- Testing STOCK_CONTRIBUTION Multi-Partner Payers ---');
+const contribState = JSON.parse(JSON.stringify(mockState));
+contribState.transactions.push({
+  type: 'STOCK_CONTRIBUTION',
+  date: '2026-08-12',
+  amount: 40000,
+  payers: [
+    { partnerId: 'partner_sneha', partnerName: 'Sneha Patel', amount: 30000 },
+    { partnerId: 'partner_aarav', partnerName: 'Aarav Sharma', amount: 10000 }
+  ]
+});
+
+const contribReport = AccountingEngine.calculateFinancials(contribState, 'ALL');
+const sneha = contribReport.partnerSummaries.find(p => p.partnerId === 'partner_sneha');
+const aarav2 = contribReport.partnerSummaries.find(p => p.partnerId === 'partner_aarav');
+
+console.log(`Sneha stock contribution: ₹${sneha.restocksPaid} (Expected: 410,000 with baseline 380k + 30k)`);
+console.log(`Aarav stock contribution: ₹${aarav2.restocksPaid} (Expected: 10,000)`);
+
+if (sneha.restocksPaid === 410000 && aarav2.restocksPaid === 10000) {
+  console.log('--- ALL DEDICATED PARTNER STOCK MONEY & SETTLEMENT TESTS PASSED WITH 100% ACCURACY! ---');
+} else {
+  console.error('Stock contribution test failed!');
+  process.exit(1);
+}

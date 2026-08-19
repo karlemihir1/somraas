@@ -66,8 +66,11 @@
             <button class="btn btn-success" onclick="TransactionsModule.openSaleModal()" title="Record a new customer sale">
               <span>+</span> Sale
             </button>
-            <button class="btn btn-primary" onclick="TransactionsModule.openRestockModal()" title="Record stock brought in and paid by partner">
-              <span>📦</span> + Restock Stock
+            <button class="btn btn-primary" onclick="TransactionsModule.openRestockModal()" title="Record physical stock arrival (units & cost)">
+              <span>📦</span> + Restock Goods
+            </button>
+            <button class="btn btn-purple" onclick="TransactionsModule.openStockContributionModal()" title="Record money put in by each partner for buying stock" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; font-weight: 700; color: #fff;">
+              <span>💰</span> + Partner Stock Money
             </button>
             <button class="btn btn-danger" onclick="TransactionsModule.openExpenseModal()" title="Record business operating expense">
               <span>+</span> Expense
@@ -374,8 +377,11 @@
               </div>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()" title="Record stock brought in and paid by partner">
-                <span>📦</span> + Buy / Restock Stock
+              <button class="btn btn-primary btn-sm" onclick="TransactionsModule.openRestockModal()" title="Record physical stock arrival">
+                <span>📦</span> + Restock Goods
+              </button>
+              <button class="btn btn-purple btn-sm" onclick="TransactionsModule.openStockContributionModal()" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; font-weight: 700; color: #fff;" title="Record money put in by partners for stock">
+                <span>💰</span> + Partner Stock Money
               </button>
               <button class="btn btn-secondary btn-sm" onclick="InventoryModule.openAddModal()">
                 + Add Product
@@ -771,221 +777,183 @@
               <button type="button" class="btn btn-secondary btn-xs" onclick="TransactionsModule.addEditSaleLineItem()">+ Add Product</button>
             </div>
             <div id="editSaleLineItemsContainer" class="item-rows-container"></div>
-          </div>
 
-          <div id="editSaleSummaryBox" class="order-summary-box"></div>
+              <div id="editSaleSummaryBox" class="order-summary-box"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editSaleModal')">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editSaleModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 2. ADD RESTOCK MODAL -->
-  <div id="restockModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <h3>📦 Partner Stock Purchase & Restock</h3>
-          <div class="modal-subtitle">Records stock brought in and personal money spent by the partner (credited in settlement)</div>
-        </div>
-        <button class="modal-close-btn" onclick="UI.closeModal('restockModal')">✕</button>
       </div>
-      <form id="restockForm">
-        <div class="modal-body">
-          <div class="form-grid">
-            <div class="form-group form-full">
-              <label>Select Product to Restock</label>
-              <select name="productId" id="restockProductSelect" class="form-control" onchange="TransactionsModule.onRestockProductChange(this.value)" required></select>
+
+      <!-- 2. ADD RESTOCK MODAL (PHYSICAL STOCK ARRIVAL ONLY) -->
+      <div id="restockModal" class="modal-backdrop">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <h3>📦 Restock Goods / Inventory Arrival</h3>
+              <div class="modal-subtitle">Increases physical stock units in catalog & updates inventory asset value</div>
             </div>
-            <div class="form-group">
-              <label>Supplier / Vendor</label>
-              <input type="text" name="vendor" class="form-control" placeholder="Vendor / Distributor name" required>
-            </div>
-            <div class="form-group form-full" style="background: var(--bg-surface-elevated); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: 700; color: var(--text-primary); margin: 0; font-size: 13px; display: flex; align-items: center; gap: 6px;">
-                  <span>💰</span> Who Paid for this Stock? (Partner Reimbursement & Settlement)
-                </label>
-                <span id="restockPayerStatusBadge" style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); background: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.3);">
-                  ✓ Matches Outflow
-                </span>
-              </div>
-
-              <div style="display: flex; gap: 16px; margin-bottom: 10px;">
-                <label style="font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                  <input type="radio" name="restockPaymentType" value="SINGLE" checked onchange="TransactionsModule.onRestockPaymentTypeToggle('SINGLE')">
-                  Single Partner Paid 100%
-                </label>
-                <label style="font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                  <input type="radio" name="restockPaymentType" value="SPLIT" onchange="TransactionsModule.onRestockPaymentTypeToggle('SPLIT')">
-                  Split Across Multiple Partners
-                </label>
-              </div>
-
-              <!-- Single Partner Mode -->
-              <div id="restockSinglePayerWrapper">
-                <select name="holdingPartnerId" id="restockPartnerAccountSelect" class="form-control"></select>
-              </div>
-
-              <!-- Split Multi-Partner Mode -->
-              <div id="restockSplitPayersWrapper" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <span style="font-size: 11.5px; color: var(--text-muted);">Enter amount contributed by each partner:</span>
-                  <div style="display: flex; gap: 6px;">
-                    <button type="button" class="btn btn-outline btn-xs" onclick="TransactionsModule.splitRestockEqually()">⚖ Split Equally</button>
-                    <button type="button" class="btn btn-outline btn-xs" onclick="TransactionsModule.clearRestockPayers()">🧹 Clear</button>
-                  </div>
+            <button class="modal-close-btn" onclick="UI.closeModal('restockModal')">✕</button>
+          </div>
+          <form id="restockForm">
+            <div class="modal-body">
+              <div class="form-grid">
+                <div class="form-group form-full">
+                  <label>Select Product to Restock</label>
+                  <select name="productId" id="restockProductSelect" class="form-control" onchange="TransactionsModule.onRestockProductChange(this.value)" required></select>
                 </div>
-                <div id="restockSplitPayersList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                <div class="form-group">
+                  <label>Supplier / Vendor</label>
+                  <input type="text" name="vendor" class="form-control" placeholder="Vendor / Distributor name" required>
+                </div>
+                <div class="form-group">
+                  <label>Arrival Date</label>
+                  <input type="date" name="date" id="restockDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Quantity Received (Units)</label>
+                  <input type="number" name="quantity" id="restockQty" class="form-control" min="1" value="10" oninput="TransactionsModule.calculateRestockTotal()" required>
+                </div>
+                <div class="form-group">
+                  <label>Unit Purchase Cost (₹)</label>
+                  <input type="number" step="1" min="0" name="unitCost" id="restockUnitCost" class="form-control" oninput="TransactionsModule.calculateRestockTotal()" required>
+                </div>
+                <div class="form-group form-full">
+                  <label>Notes / Batch Ref</label>
+                  <input type="text" name="notes" class="form-control" placeholder="e.g. Batch #102, Invoice Ref">
+                </div>
+              </div>
+              <div class="order-summary-box">
+                <div class="order-summary-row total">
+                  <span>Total Inventory Value Added:</span>
+                  <span id="restockTotalPreview" style="color: var(--color-primary); font-weight: 800;">₹0.00</span>
+                </div>
               </div>
             </div>
-
-            <div class="form-group">
-              <label>Restock Date</label>
-              <input type="date" name="date" id="restockDate" class="form-control" required>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="UI.closeModal('restockModal')">Cancel</button>
+              <button type="submit" class="btn btn-primary">Confirm Stock Arrival</button>
             </div>
-            <div class="form-group">
-              <label>Quantity Received (Units)</label>
-              <input type="number" name="quantity" id="restockQty" class="form-control" min="1" value="10" oninput="TransactionsModule.calculateRestockTotal()" required>
-            </div>
-            <div class="form-group">
-              <label>Unit Purchase Cost (₹)</label>
-              <input type="number" step="1" min="0" name="unitCost" id="restockUnitCost" class="form-control" oninput="TransactionsModule.calculateRestockTotal()" required>
-            </div>
-            <div class="form-group">
-              <label>Payment Method</label>
-              <select name="paymentMethod" class="form-control">
-                <option value="Personal Bank Transfer">Personal Bank Transfer (IMPS / NEFT)</option>
-                <option value="Personal UPI">Personal UPI (GPay / PhonePe)</option>
-                <option value="Personal Cash">Personal Cash</option>
-                <option value="Vendor Credit / Payables">Vendor Credit / Payables</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Notes</label>
-              <input type="text" name="notes" class="form-control" placeholder="PO # or Batch Ref">
-            </div>
-          </div>
-
-          <div class="order-summary-box">
-            <div class="order-summary-row total">
-              <span>Total Restock Outflow:</span>
-              <span id="restockTotalPreview" style="color: var(--color-danger);">₹0.00</span>
-            </div>
-          </div>
+          </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('restockModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Confirm Restock</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 2B. EDIT RESTOCK MODAL -->
-  <div id="editRestockModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <h3>✎ Edit Restock Entry</h3>
-        </div>
-        <button class="modal-close-btn" onclick="UI.closeModal('editRestockModal')">✕</button>
       </div>
-      <form id="editRestockForm">
-        <input type="hidden" name="id" id="editRestockTxId">
-        <div class="modal-body">
-          <div class="form-grid">
-            <div class="form-group form-full">
-              <label>Product</label>
-              <select name="productId" id="editRestockProductSelect" class="form-control" required></select>
+
+      <!-- 2B. EDIT RESTOCK MODAL -->
+      <div id="editRestockModal" class="modal-backdrop">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <h3>✎ Edit Stock Arrival Entry</h3>
             </div>
-            <div class="form-group">
-              <label>Supplier / Vendor</label>
-              <input type="text" name="vendor" id="editRestockVendor" class="form-control" required>
-            </div>
-            
-            <div class="form-group form-full" style="background: var(--bg-surface-elevated); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: 700; color: var(--text-primary); margin: 0; font-size: 13px; display: flex; align-items: center; gap: 6px;">
-                  <span>💰</span> Who Paid for this Stock? (Partner Reimbursement & Settlement)
-                </label>
-                <span id="editRestockPayerStatusBadge" style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); background: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.3);">
-                  ✓ Matches Outflow
-                </span>
-              </div>
-
-              <div style="display: flex; gap: 16px; margin-bottom: 10px;">
-                <label style="font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                  <input type="radio" name="editRestockPaymentType" value="SINGLE" checked onchange="TransactionsModule.onEditRestockPaymentTypeToggle('SINGLE')">
-                  Single Partner Paid 100%
-                </label>
-                <label style="font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                  <input type="radio" name="editRestockPaymentType" value="SPLIT" onchange="TransactionsModule.onEditRestockPaymentTypeToggle('SPLIT')">
-                  Split Across Multiple Partners
-                </label>
-              </div>
-
-              <!-- Single Partner Mode -->
-              <div id="editRestockSinglePayerWrapper">
-                <select name="holdingPartnerId" id="editRestockPartnerAccountSelect" class="form-control"></select>
-              </div>
-
-              <!-- Split Multi-Partner Mode -->
-              <div id="editRestockSplitPayersWrapper" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <span style="font-size: 11.5px; color: var(--text-muted);">Enter amount contributed by each partner:</span>
-                  <div style="display: flex; gap: 6px;">
-                    <button type="button" class="btn btn-outline btn-xs" onclick="TransactionsModule.splitEditRestockEqually()">⚖ Split Equally</button>
-                    <button type="button" class="btn btn-outline btn-xs" onclick="TransactionsModule.clearEditRestockPayers()">🧹 Clear</button>
-                  </div>
+            <button class="modal-close-btn" onclick="UI.closeModal('editRestockModal')">✕</button>
+          </div>
+          <form id="editRestockForm">
+            <input type="hidden" name="id" id="editRestockTxId">
+            <div class="modal-body">
+              <div class="form-grid">
+                <div class="form-group form-full">
+                  <label>Product</label>
+                  <select name="productId" id="editRestockProductSelect" class="form-control" required></select>
                 </div>
-                <div id="editRestockSplitPayersList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                <div class="form-group">
+                  <label>Supplier / Vendor</label>
+                  <input type="text" name="vendor" id="editRestockVendor" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Arrival Date</label>
+                  <input type="date" name="date" id="editRestockDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Quantity Received (Units)</label>
+                  <input type="number" name="quantity" id="editRestockQty" class="form-control" min="1" oninput="TransactionsModule.calculateEditRestockTotal()" required>
+                </div>
+                <div class="form-group">
+                  <label>Unit Purchase Cost (₹)</label>
+                  <input type="number" step="1" min="0" name="unitCost" id="editRestockUnitCost" class="form-control" oninput="TransactionsModule.calculateEditRestockTotal()" required>
+                </div>
+                <div class="form-group form-full">
+                  <label>Notes</label>
+                  <input type="text" name="notes" id="editRestockNotes" class="form-control">
+                </div>
+              </div>
+              <div class="order-summary-box">
+                <div class="order-summary-row total">
+                  <span>Updated Inventory Value Added:</span>
+                  <span id="editRestockTotalPreview" style="color: var(--color-primary); font-weight: 800;">₹0.00</span>
+                </div>
               </div>
             </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editRestockModal')">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-            <div class="form-group">
-              <label>Date</label>
-              <input type="date" name="date" id="editRestockDate" class="form-control" required>
+      <!-- 2C. DEDICATED PARTNER STOCK MONEY / CONTRIBUTION MODAL -->
+      <div id="stockContributionModal" class="modal-backdrop">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <h3>💰 Partner Money for Stock Buying</h3>
+              <div class="modal-subtitle">Record money spent/contributed by each partner for buying stock (used in settlement)</div>
             </div>
-            <div class="form-group">
-              <label>Quantity Received</label>
-              <input type="number" name="quantity" id="editRestockQty" class="form-control" min="1" oninput="TransactionsModule.calculateEditRestockTotal()" required>
-            </div>
-            <div class="form-group">
-              <label>Unit Purchase Cost (₹)</label>
-              <input type="number" step="1" min="0" name="unitCost" id="editRestockUnitCost" class="form-control" oninput="TransactionsModule.calculateEditRestockTotal()" required>
-            </div>
-            <div class="form-group">
-              <label>Payment Method</label>
-              <select name="paymentMethod" id="editRestockPaymentMethod" class="form-control">
-                <option value="Personal Bank Transfer">Personal Bank Transfer</option>
-                <option value="Personal UPI">Personal UPI</option>
-                <option value="Personal Cash">Personal Cash</option>
-                <option value="Vendor Credit">Vendor Credit</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Notes</label>
-              <input type="text" name="notes" id="editRestockNotes" class="form-control">
-            </div>
+            <button class="modal-close-btn" onclick="UI.closeModal('stockContributionModal')">✕</button>
           </div>
-          <div class="order-summary-box">
-            <div class="order-summary-row total">
-              <span>Updated Total Outflow:</span>
-              <span id="editRestockTotalPreview" style="color: var(--color-danger);">₹0.00</span>
+          <form id="stockContributionForm">
+            <div class="modal-body">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Payment / Contribution Date</label>
+                  <input type="date" name="date" id="stockContribDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label>Payment Method</label>
+                  <select name="paymentMethod" class="form-control">
+                    <option value="Personal UPI">Personal UPI (GPay / PhonePe / Paytm)</option>
+                    <option value="Personal Bank Transfer">Personal Bank Transfer (IMPS / NEFT)</option>
+                    <option value="Personal Cash">Personal Cash</option>
+                    <option value="Supplier Advance">Supplier Advance / Cheque</option>
+                  </select>
+                </div>
+
+                <!-- Partner Money Inputs -->
+                <div class="form-group form-full" style="background: var(--bg-surface-elevated); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <label style="font-weight: 700; color: var(--text-primary); margin: 0; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                      <span>👥</span> Money Put In by Each Partner (₹)
+                    </label>
+                    <div style="display: flex; gap: 6px;">
+                      <button type="button" class="btn btn-outline btn-xs" onclick="TransactionsModule.clearStockContribPayers()">🧹 Clear</button>
+                    </div>
+                  </div>
+                  <div id="stockContribPayersList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+
+                <div class="form-group form-full">
+                  <label>Goods / Supplier / Batch Details</label>
+                  <input type="text" name="notes" class="form-control" placeholder="e.g. Stock purchase money for Supplier XYZ / Batch #101" required>
+                </div>
+              </div>
+
+              <div class="order-summary-box" style="margin-top: 14px;">
+                <div class="order-summary-row total">
+                  <span>Total Money Contributed for Stock:</span>
+                  <span id="stockContribTotalPreview" style="color: var(--color-purple); font-weight: 800; font-size: 18px;">₹0.00</span>
+                </div>
+              </div>
             </div>
-          </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="UI.closeModal('stockContributionModal')">Cancel</button>
+              <button type="submit" class="btn btn-purple" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; font-weight: 700; color: #fff;">Record Partner Stock Money</button>
+            </div>
+          </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('editRestockModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      </div>
 
   <!-- 3. ADD OPERATING EXPENSE MODAL -->
   <div id="expenseModal" class="modal-backdrop">
@@ -1559,15 +1527,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts with Cache-Busting Version Query -->
-  <script src="js/state.js?v=5.0"></script>
-  <script src="js/accounting.js?v=5.0"></script>
-  <script src="js/ui.js?v=5.0"></script>
-  <script src="js/inventory.js?v=5.0"></script>
-  <script src="js/transactions.js?v=5.0"></script>
-  <script src="js/partners.js?v=5.0"></script>
-  <script src="js/reports.js?v=5.0"></script>
-  <script src="js/audit.js?v=5.0"></script>
-  <script src="js/app.js?v=5.0"></script>
+  <script src="js/state.js?v=6.0"></script>
+  <script src="js/accounting.js?v=6.0"></script>
+  <script src="js/ui.js?v=6.0"></script>
+  <script src="js/inventory.js?v=6.0"></script>
+  <script src="js/transactions.js?v=6.0"></script>
+  <script src="js/partners.js?v=6.0"></script>
+  <script src="js/reports.js?v=6.0"></script>
+  <script src="js/audit.js?v=6.0"></script>
+  <script src="js/app.js?v=6.0"></script>
 
 </body>
 </html>
