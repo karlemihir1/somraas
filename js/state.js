@@ -27,43 +27,43 @@ const DEFAULT_INITIAL_STATE = {
     'Miscellaneous Expenses'
   ],
   activeUser: {
-    id: 'partner_aarav',
-    name: 'Aarav Sharma',
+    id: 'partner_mihir',
+    name: 'Mihir',
     role: 'Managing Partner',
-    avatar: 'A'
+    avatar: 'M'
   },
   partners: [
     {
-      id: 'partner_aarav',
-      name: 'Aarav Sharma',
+      id: 'partner_mihir',
+      name: 'Mihir',
       role: 'Managing Partner',
-      email: 'aarav@company.in',
-      avatar: 'A',
+      email: 'mihir@somraas.in',
+      avatar: 'M',
       color: '#3b82f6',
-      profitShareRatio: 40,
-      initialCapital: 500000,
+      profitShareRatio: 33.4,
+      initialCapital: 0,
       createdAt: '2026-01-01'
     },
     {
-      id: 'partner_sneha',
-      name: 'Sneha Patel',
+      id: 'partner_varun',
+      name: 'Varun',
       role: 'Operations Partner',
-      email: 'sneha@company.in',
-      avatar: 'S',
+      email: 'varun@somraas.in',
+      avatar: 'V',
       color: '#10b981',
-      profitShareRatio: 35,
-      initialCapital: 350000,
+      profitShareRatio: 33.3,
+      initialCapital: 0,
       createdAt: '2026-01-01'
     },
     {
-      id: 'partner_rohan',
-      name: 'Rohan Verma',
-      role: 'Marketing & Sales Partner',
-      email: 'rohan@company.in',
-      avatar: 'R',
+      id: 'partner_vaishali',
+      name: 'Vaishali',
+      role: 'Founding Partner',
+      email: 'vaishali@somraas.in',
+      avatar: 'V',
       color: '#8b5cf6',
-      profitShareRatio: 25,
-      initialCapital: 250000,
+      profitShareRatio: 33.3,
+      initialCapital: 0,
       createdAt: '2026-01-01'
     }
   ],
@@ -395,6 +395,25 @@ class StateStore {
       // Sync activeUser
       if (st.activeUser && partnerMap[st.activeUser.id]) {
         st.activeUser.name = partnerMap[st.activeUser.id];
+      } else if (st.partners && st.partners.length > 0) {
+        const firstP = st.partners[0];
+        st.activeUser = {
+          id: firstP.id,
+          name: firstP.name,
+          role: firstP.role || 'Managing Partner',
+          avatar: (firstP.name || 'M')[0].toUpperCase()
+        };
+      }
+
+      // Clean legacy "Aarav Sharma" from audit logs
+      const defaultName = st.partners[0]?.name || 'Mihir';
+      if (st.auditLogs && Array.isArray(st.auditLogs)) {
+        for (const log of st.auditLogs) {
+          if (log.user === 'Aarav Sharma') log.user = defaultName;
+          if (log.details && typeof log.details === 'string' && log.details.includes('Aarav Sharma')) {
+            log.details = log.details.replaceAll('Aarav Sharma', defaultName);
+          }
+        }
       }
 
       // Sync transactions
@@ -409,6 +428,8 @@ class StateStore {
           if (tx.toPartnerId && partnerMap[tx.toPartnerId]) {
             tx.toPartnerName = partnerMap[tx.toPartnerId];
           }
+          if (tx.recordedBy === 'Aarav Sharma') tx.recordedBy = defaultName;
+          if (tx.lastEditedBy === 'Aarav Sharma') tx.lastEditedBy = defaultName;
         }
       }
     }
@@ -450,7 +471,30 @@ class StateStore {
           this.state = cloudData;
           if (!this.state.auditLogs) this.state.auditLogs = [];
           if (!this.state.expenseCategories) this.state.expenseCategories = DEFAULT_INITIAL_STATE.expenseCategories;
-          if (currentActiveUser) this.state.activeUser = currentActiveUser;
+          
+          if (this.state.partners && this.state.partners.length > 0) {
+            const partnerMap = {};
+            this.state.partners.forEach(p => partnerMap[p.id] = p.name);
+            if (!this.state.activeUser || !partnerMap[this.state.activeUser.id]) {
+              const firstP = this.state.partners[0];
+              this.state.activeUser = {
+                id: firstP.id,
+                name: firstP.name,
+                role: firstP.role || 'Managing Partner',
+                avatar: (firstP.name || 'M')[0].toUpperCase()
+              };
+            }
+            const defaultName = this.state.partners[0]?.name || 'Mihir';
+            for (const log of this.state.auditLogs) {
+              if (log.user === 'Aarav Sharma') log.user = defaultName;
+              if (log.details && typeof log.details === 'string') {
+                log.details = log.details.replaceAll('Aarav Sharma', defaultName);
+              }
+            }
+          }
+          if (currentActiveUser && this.state.partners.some(p => p.id === currentActiveUser.id)) {
+            this.state.activeUser = currentActiveUser;
+          }
           this.normalizeAndMergeDuplicateProducts();
           try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); } catch (e) {}
           this.notify();
@@ -479,7 +523,29 @@ class StateStore {
               const currentActiveUser = this.state.activeUser;
               this.state = payload.data;
               if (!this.state.auditLogs) this.state.auditLogs = [];
-              if (currentActiveUser) this.state.activeUser = currentActiveUser;
+              if (this.state.partners && this.state.partners.length > 0) {
+                const partnerMap = {};
+                this.state.partners.forEach(p => partnerMap[p.id] = p.name);
+                if (!this.state.activeUser || !partnerMap[this.state.activeUser.id]) {
+                  const firstP = this.state.partners[0];
+                  this.state.activeUser = {
+                    id: firstP.id,
+                    name: firstP.name,
+                    role: firstP.role || 'Managing Partner',
+                    avatar: (firstP.name || 'M')[0].toUpperCase()
+                  };
+                }
+                const defaultName = this.state.partners[0]?.name || 'Mihir';
+                for (const log of this.state.auditLogs) {
+                  if (log.user === 'Aarav Sharma') log.user = defaultName;
+                  if (log.details && typeof log.details === 'string') {
+                    log.details = log.details.replaceAll('Aarav Sharma', defaultName);
+                  }
+                }
+              }
+              if (currentActiveUser && this.state.partners.some(p => p.id === currentActiveUser.id)) {
+                this.state.activeUser = currentActiveUser;
+              }
               try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); } catch (err) {}
               this.notify();
               this.updateSyncBadge('online');
