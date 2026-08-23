@@ -347,8 +347,13 @@ const InventoryModule = {
     const fromSelect = document.getElementById('transferFromLocationSelect');
     if (!fromSelect) return;
 
-    const selectedOption = fromSelect.options[fromSelect.selectedIndex];
-    const availableQty = selectedOption ? parseInt(selectedOption.getAttribute('data-qty'), 10) || 0 : 0;
+    let availableQty = 0;
+    if (fromSelect.options && fromSelect.selectedIndex >= 0) {
+      const selectedOption = fromSelect.options[fromSelect.selectedIndex];
+      if (selectedOption && typeof selectedOption.getAttribute === 'function') {
+        availableQty = parseInt(selectedOption.getAttribute('data-qty'), 10) || 0;
+      }
+    }
 
     const qtyInput = document.getElementById('transferQuantity');
     const hint = document.getElementById('transferAvailableHint');

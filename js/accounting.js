@@ -8,6 +8,11 @@ const AccountingEngine = {
   // Compatibility alias for summary calculations
   calculateFinancialSummary(state, period = 'ALL') {
     const f = this.calculateFinancials(state, period);
+    const partners = (f.partnerSummaries || []).map(p => ({
+      ...p,
+      totalCapitalAccountBalance: p.endingCapital
+    }));
+
     return {
       ...f,
       totalRevenue: f.revenue,
@@ -23,7 +28,8 @@ const AccountingEngine = {
       },
       cash: {
         balance: f.liquidCashBalance
-      }
+      },
+      partners
     };
   },
 

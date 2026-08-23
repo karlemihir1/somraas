@@ -495,6 +495,9 @@ const TransactionsModule = {
     const container = document.getElementById('saleLineItemsContainer');
     if (!container) return;
 
+    const state = window.Store.getState();
+    const products = state.products || [];
+
     container.innerHTML = this.saleLineItems.map((item, idx) => {
       const lineTotal = (item.quantity || 1) * (item.unitPrice || 0);
 

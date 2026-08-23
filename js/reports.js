@@ -104,7 +104,8 @@ const ReportsModule = {
     const stockVal = summary.inventory.totalCostValue;
     const totalAssets = cash + stockVal;
 
-    const totalPartnerEquity = summary.partners.reduce((sum, p) => sum + p.totalCapitalAccountBalance, 0);
+    const partnerList = summary.partners || summary.partnerSummaries || [];
+    const totalPartnerEquity = partnerList.reduce((sum, p) => sum + (Number(p.totalCapitalAccountBalance) || Number(p.endingCapital) || 0), 0);
 
     container.innerHTML = `
       <div class="statement-card">
@@ -134,10 +135,10 @@ const ReportsModule = {
         <div style="font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-top: 16px; margin-bottom: 6px;">
           Partner Equity & Capital Accounts
         </div>
-        ${summary.partners.map(p => `
+        ${partnerList.map(p => `
           <div class="statement-row indent">
             <span>${p.name} (${p.profitShareRatio}%)</span>
-            <span style="font-weight: 600;">${window.UI.formatCurrency(p.totalCapitalAccountBalance)}</span>
+            <span style="font-weight: 600;">${window.UI.formatCurrency(p.totalCapitalAccountBalance || p.endingCapital || 0)}</span>
           </div>
         `).join('')}
         <div class="statement-row subtotal">
