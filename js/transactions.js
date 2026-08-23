@@ -119,6 +119,14 @@ const TransactionsModule = {
         this.handlePartnerTransferSubmit(new FormData(partnerTransferForm));
       });
     }
+
+    const markPaidForm = document.getElementById('markPaidForm');
+    if (markPaidForm) {
+      markPaidForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleMarkPaidSubmit(new FormData(markPaidForm));
+      });
+    }
   },
 
   render() {
@@ -128,7 +136,23 @@ const TransactionsModule = {
     if (!tbody) return;
 
     const filtered = transactions.filter(tx => {
-      const matchesType = this.selectedType === 'ALL' || tx.type === this.selectedType;
+      let matchesType = false;
+      if (this.selectedType === 'ALL') {
+        matchesType = true;
+      } else if (this.selectedType === 'UNPAID_CREDIT') {
+        matchesType = (tx.type === 'SALE' && tx.paymentStatus === 'UNPAID');
+      } else if (this.selectedType === 'PAID_SALE') {
+        matchesType = (tx.type === 'SALE' && tx.paymentStatus !== 'UNPAID');
+      } else if (this.selectedType === 'SALE') {
+        matchesType = (tx.type === 'SALE');
+      } else if (this.selectedType === 'PURCHASE') {
+        matchesType = (tx.type === 'PURCHASE');
+      } else if (this.selectedType === 'STOCK_CONTRIBUTION') {
+        matchesType = (tx.type === 'STOCK_CONTRIBUTION' || tx.type === 'STOCK_INVESTMENT');
+      } else {
+        matchesType = (tx.type === this.selectedType);
+      }
+
       const matchesPartner = this.selectedPartnerFilter === 'ALL' || 
         tx.recordedBy === this.selectedPartnerFilter || 
         tx.partnerName === this.selectedPartnerFilter ||
@@ -180,9 +204,15 @@ const TransactionsModule = {
 
       switch (tx.type) {
         case 'SALE':
-          typeBadge = '<span class="badge badge-sale">SALE</span>';
-          cashClass = 'color: var(--color-success); font-weight: 700;';
-          cashPrefix = '+';
+          if (tx.paymentStatus === 'UNPAID') {
+            typeBadge = '<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger); border: 1px solid var(--color-danger); font-weight: 700;">🔴 UNPAID CREDIT</span>';
+            cashClass = 'color: var(--color-danger); font-weight: 700;';
+            cashPrefix = '🔴 Due: ';
+          } else {
+            typeBadge = '<span class="badge badge-sale">SALE (PAID)</span>';
+            cashClass = 'color: var(--color-success); font-weight: 700;';
+            cashPrefix = '+';
+          }
           break;
         case 'PURCHASE':
           typeBadge = '<span class="badge badge-purchase">RESTOCK</span>';
@@ -230,8 +260,12 @@ const TransactionsModule = {
 
       // Personal Account Badge
       let accountBadge = '';
-      if (tx.type === 'SALE' && tx.holdingPartnerName) {
-        accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(16, 185, 129, 0.1); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💰 Received in: <strong>${tx.holdingPartnerName}'s Account</strong></span>`;
+      if (tx.type === 'SALE') {
+        if (tx.paymentStatus === 'UNPAID') {
+          accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(239, 68, 68, 0.12); color: var(--color-danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">⏳ Udhaar / Uncollected</span>`;
+        } else if (tx.holdingPartnerName) {
+          accountBadge = `<span style="display: inline-block; font-size: 11px; background: rgba(16, 185, 129, 0.1); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25); padding: 1px 6px; border-radius: var(--radius-sm); margin-top: 3px;">💰 Received in: <strong>${tx.holdingPartnerName}'s Account</strong></span>`;
+        }
       } else if (tx.type === 'STOCK_CONTRIBUTION' || tx.type === 'STOCK_INVESTMENT') {
         if (tx.payers && Array.isArray(tx.payers) && tx.payers.length > 0) {
           const payerStr = tx.payers.map(p => `<strong>${p.partnerName}</strong> (₹${Number(p.amount).toLocaleString('en-IN')})`).join(' + ');
@@ -276,7 +310,12 @@ const TransactionsModule = {
             ${cashPrefix}${window.UI.formatCurrency(tx.amount)}
           </td>
           <td>
-            <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              ${tx.type === 'SALE' && tx.paymentStatus === 'UNPAID' ? `
+                <button class="btn btn-success btn-xs" onclick="TransactionsModule.openMarkPaidModal('${tx.id}')" title="Customer paid - collect into partner account" style="font-weight: 700;">
+                  💵 Mark Paid
+                </button>
+              ` : ''}
               <button class="btn btn-primary btn-xs" onclick="TransactionsModule.openEditModal('${tx.id}')" title="Edit this transaction">
                 ✎ Edit
               </button>
@@ -386,13 +425,36 @@ const TransactionsModule = {
   },
 
   // -------------------------------------------------------------
-  // SALE WORKFLOW (TRACK WHICH PERSONAL ACCOUNT RECEIVED MONEY)
+  // SALE WORKFLOW (TRACK WHICH PERSONAL ACCOUNT RECEIVED MONEY OR UNPAID CREDIT)
   // -------------------------------------------------------------
+  onSalePaymentStatusChange(status) {
+    const acctGroup = document.getElementById('salePartnerAccountGroup');
+    const methodGroup = document.getElementById('salePaymentMethodGroup');
+    const alertBox = document.getElementById('saleCreditAlertBox');
+    const acctSelect = document.getElementById('salePartnerAccountSelect');
+
+    if (status === 'UNPAID') {
+      if (acctGroup) acctGroup.style.display = 'none';
+      if (methodGroup) methodGroup.style.display = 'none';
+      if (alertBox) alertBox.style.display = 'block';
+      if (acctSelect) acctSelect.removeAttribute('required');
+    } else {
+      if (acctGroup) acctGroup.style.display = 'block';
+      if (methodGroup) methodGroup.style.display = 'block';
+      if (alertBox) alertBox.style.display = 'none';
+      if (acctSelect) acctSelect.setAttribute('required', 'required');
+    }
+  },
+
   openSaleModal() {
     this.saleLineItems = [];
     const form = document.getElementById('saleForm');
     if (form) form.reset();
     document.getElementById('saleDate').value = new Date().toISOString().split('T')[0];
+
+    const paidRadio = document.querySelector('input[name="paymentStatus"][value="PAID"]');
+    if (paidRadio) paidRadio.checked = true;
+    this.onSalePaymentStatusChange('PAID');
 
     this.populatePartnerAccountDropdowns();
     this.addSaleLineItem();
@@ -545,8 +607,10 @@ const TransactionsModule = {
   handleSaleSubmit(formData) {
     const customer = formData.get('customer')?.trim() || 'Retail Customer';
     const date = formData.get('date') || new Date().toISOString().split('T')[0];
+    const paymentStatus = formData.get('paymentStatus') || 'PAID';
+    const isUnpaid = paymentStatus === 'UNPAID';
     const holdingPartnerId = formData.get('holdingPartnerId');
-    const paymentMethod = formData.get('paymentMethod') || 'UPI / Personal Bank';
+    const paymentMethod = isUnpaid ? 'Credit / Udhaar' : (formData.get('paymentMethod') || 'UPI / Personal Bank');
     const notes = formData.get('notes')?.trim() || '';
 
     const state = window.Store.getState();
@@ -598,10 +662,13 @@ const TransactionsModule = {
       type: 'SALE',
       date,
       customer,
-      holdingPartnerId: holdingPartner ? holdingPartner.id : null,
-      holdingPartnerName: holdingPartner ? holdingPartner.name : 'Personal Account',
+      paymentStatus,
+      holdingPartnerId: isUnpaid ? null : (holdingPartner ? holdingPartner.id : null),
+      holdingPartnerName: isUnpaid ? 'Unpaid Credit' : (holdingPartner ? holdingPartner.name : 'Personal Account'),
       category: 'Product Sales',
-      description: `Sale to ${customer} (${totalQty} items) - Received in ${holdingPartner ? holdingPartner.name : 'Personal'}'s Account`,
+      description: isUnpaid 
+        ? `Credit sale to ${customer} (${totalQty} items) [UNPAID]` 
+        : `Sale to ${customer} (${totalQty} items) - Received in ${holdingPartner ? holdingPartner.name : 'Personal'}'s Account`,
       amount: totalRevenue,
       cogs: totalCOGS,
       grossProfit,
@@ -612,18 +679,43 @@ const TransactionsModule = {
     });
 
     window.UI.closeModal('saleModal');
-    window.UI.showToast(`Sale of ${window.UI.formatCurrency(totalRevenue)} recorded into ${holdingPartner ? holdingPartner.name : 'Partner'}'s Account!`);
+    if (isUnpaid) {
+      window.UI.showToast(`Credit sale of ${window.UI.formatCurrency(totalRevenue)} recorded for ${customer}! Stock deducted.`, 'info');
+    } else {
+      window.UI.showToast(`Sale of ${window.UI.formatCurrency(totalRevenue)} recorded into ${holdingPartner ? holdingPartner.name : 'Partner'}'s Account!`);
+    }
   },
 
   // Edit Sale
+  onEditSalePaymentStatusChange(status) {
+    const acctGroup = document.getElementById('editSalePartnerAccountGroup');
+    const methodGroup = document.getElementById('editSalePaymentMethodGroup');
+    const acctSelect = document.getElementById('editSalePartnerAccountSelect');
+
+    if (status === 'UNPAID') {
+      if (acctGroup) acctGroup.style.display = 'none';
+      if (methodGroup) methodGroup.style.display = 'none';
+      if (acctSelect) acctSelect.removeAttribute('required');
+    } else {
+      if (acctGroup) acctGroup.style.display = 'block';
+      if (methodGroup) methodGroup.style.display = 'block';
+      if (acctSelect) acctSelect.setAttribute('required', 'required');
+    }
+  },
+
   openEditSaleModal(tx) {
     this.populatePartnerAccountDropdowns();
     document.getElementById('editSaleTxId').value = tx.id;
     document.getElementById('editSaleCustomer').value = tx.customer || '';
     document.getElementById('editSaleDate').value = tx.date || '';
     document.getElementById('editSalePartnerAccountSelect').value = tx.holdingPartnerId || '';
-    document.getElementById('editSalePaymentMethod').value = tx.paymentMethod || 'UPI / Personal Bank';
+    document.getElementById('editSalePaymentMethod').value = tx.paymentMethod || 'UPI / QR Code';
     document.getElementById('editSaleNotes').value = tx.notes || '';
+
+    const isUnpaid = tx.paymentStatus === 'UNPAID';
+    const statusRadio = document.getElementById(isUnpaid ? 'editSaleStatusUnpaid' : 'editSaleStatusPaid');
+    if (statusRadio) statusRadio.checked = true;
+    this.onEditSalePaymentStatusChange(isUnpaid ? 'UNPAID' : 'PAID');
 
     this.editingSaleLineItems = (tx.items || []).map(it => ({ ...it }));
     if (this.editingSaleLineItems.length === 0) {
@@ -779,8 +871,10 @@ const TransactionsModule = {
     const txId = formData.get('id');
     const customer = formData.get('customer')?.trim() || 'Retail Customer';
     const date = formData.get('date');
+    const paymentStatus = formData.get('editPaymentStatus') || 'PAID';
+    const isUnpaid = paymentStatus === 'UNPAID';
     const holdingPartnerId = formData.get('holdingPartnerId');
-    const paymentMethod = formData.get('paymentMethod');
+    const paymentMethod = isUnpaid ? 'Credit / Udhaar' : (formData.get('paymentMethod') || 'UPI / QR Code');
     const notes = formData.get('notes')?.trim() || '';
 
     const holdingPartner = window.Store.getState().partners.find(p => p.id === holdingPartnerId);
@@ -814,11 +908,14 @@ const TransactionsModule = {
     window.Store.updateTransaction(txId, {
       customer,
       date,
-      holdingPartnerId: holdingPartner ? holdingPartner.id : null,
-      holdingPartnerName: holdingPartner ? holdingPartner.name : 'Personal Account',
+      paymentStatus,
+      holdingPartnerId: isUnpaid ? null : (holdingPartner ? holdingPartner.id : null),
+      holdingPartnerName: isUnpaid ? 'Unpaid Credit' : (holdingPartner ? holdingPartner.name : 'Personal Account'),
       paymentMethod,
       notes,
-      description: `Sale to ${customer} (${totalQty} items) - Received in ${holdingPartner ? holdingPartner.name : 'Personal'}'s Account`,
+      description: isUnpaid 
+        ? `Credit sale to ${customer} (${totalQty} items) [UNPAID]` 
+        : `Sale to ${customer} (${totalQty} items) - Received in ${holdingPartner ? holdingPartner.name : 'Personal'}'s Account`,
       amount: totalRevenue,
       cogs: totalCOGS,
       grossProfit,
@@ -827,7 +924,82 @@ const TransactionsModule = {
     });
 
     window.UI.closeModal('editSaleModal');
-    window.UI.showToast(`Sale updated.`);
+    window.UI.showToast(`Sale updated successfully.`);
+  },
+
+  // -------------------------------------------------------------
+  // MARK PAID / COLLECT CREDIT WORKFLOW
+  // -------------------------------------------------------------
+  openMarkPaidModal(txId) {
+    const state = window.Store.getState();
+    const tx = state.transactions.find(t => t.id === txId);
+    if (!tx) return;
+
+    document.getElementById('markPaidTxId').value = tx.id;
+    document.getElementById('markPaidDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('markPaidNotes').value = '';
+
+    const select = document.getElementById('markPaidPartnerSelect');
+    if (select && state.partners) {
+      select.innerHTML = state.partners.map(p => 
+        `<option value="${p.id}">${p.name}'s Personal Account / UPI</option>`
+      ).join('');
+    }
+
+    const summaryBox = document.getElementById('markPaidSummaryBox');
+    if (summaryBox) {
+      const itemsStr = tx.items ? tx.items.map(i => `${i.quantity}x ${i.productName}`).join(', ') : 'Items';
+      summaryBox.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: var(--text-muted);">Customer:</span>
+          <strong style="color: var(--text-primary); font-size: 14px;">${tx.customer || 'Retail Client'}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: var(--text-muted);">Items:</span>
+          <span style="font-weight: 500;">${itemsStr}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-top: 8px; margin-top: 6px; border-top: 1px solid var(--border-subtle);">
+          <span style="font-weight: 700; color: var(--text-primary);">Total Amount Due:</span>
+          <strong style="color: var(--color-success); font-size: 16px;">${window.UI.formatCurrency(tx.amount)}</strong>
+        </div>
+      `;
+    }
+
+    window.UI.openModal('markPaidModal');
+  },
+
+  handleMarkPaidSubmit(formData) {
+    const txId = formData.get('txId');
+    const holdingPartnerId = formData.get('holdingPartnerId');
+    const date = formData.get('date') || new Date().toISOString().split('T')[0];
+    const paymentMethod = formData.get('paymentMethod') || 'UPI / QR Code';
+    const notes = formData.get('notes')?.trim() || '';
+
+    const state = window.Store.getState();
+    const tx = state.transactions.find(t => t.id === txId);
+    const partner = state.partners.find(p => p.id === holdingPartnerId) || state.partners[0];
+
+    if (!tx || !partner) {
+      window.UI.showToast('Transaction not found.', 'danger');
+      return;
+    }
+
+    const fullNotes = [tx.notes, notes].filter(Boolean).join(' | ');
+
+    window.Store.updateTransaction(tx.id, {
+      paymentStatus: 'PAID',
+      holdingPartnerId: partner.id,
+      holdingPartnerName: partner.name,
+      paymentMethod,
+      paidDate: date,
+      description: `Sale to ${tx.customer || 'Customer'} - Collected into ${partner.name}'s Account`,
+      notes: fullNotes
+    });
+
+    window.Store.logActivity('CREDIT SETTLED', `Collected payment of ₹${Number(tx.amount).toLocaleString('en-IN')} from ${tx.customer || 'Customer'} into ${partner.name}'s Account`);
+
+    window.UI.closeModal('markPaidModal');
+    window.UI.showToast(`₹${Number(tx.amount).toLocaleString('en-IN')} collected into ${partner.name}'s Account!`, 'success');
   },
 
   // -------------------------------------------------------------

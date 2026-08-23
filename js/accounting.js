@@ -107,13 +107,19 @@ const AccountingEngine = {
       };
     }
 
+    let totalUnpaidCredit = 0;
+
     // Process all transactions for personal cash flow & account balances
     for (const tx of transactions) {
       const amount = Number(tx.amount) || 0;
       const holdingPartner = tx.holdingPartnerId || (partners.find(p => p.name === tx.recordedBy)?.id);
 
-      if (tx.type === 'SALE' && holdingPartner && partnerSummaries[holdingPartner]) {
-        partnerSummaries[holdingPartner].salesCollected += amount;
+      if (tx.type === 'SALE') {
+        if (tx.paymentStatus === 'UNPAID') {
+          totalUnpaidCredit += amount;
+        } else if (holdingPartner && partnerSummaries[holdingPartner]) {
+          partnerSummaries[holdingPartner].salesCollected += amount;
+        }
       } else if (tx.type === 'EXPENSE' && holdingPartner && partnerSummaries[holdingPartner]) {
         partnerSummaries[holdingPartner].expensesPaid += amount;
       } else if (tx.type === 'STOCK_CONTRIBUTION' || tx.type === 'STOCK_INVESTMENT' || tx.type === 'PURCHASE') {
@@ -185,6 +191,7 @@ const AccountingEngine = {
       inventoryValuation: totalInventoryValuation,
       totalStockUnits,
       liquidCashBalance: totalLiquidCashHeldAcrossPartners,
+      totalUnpaidCredit,
       totalInjections,
       totalDrawings,
       totalEndingCapital,

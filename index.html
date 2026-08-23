@@ -326,12 +326,15 @@
               <input type="text" id="txSearch" placeholder="Search by customer, vendor, note, description...">
             </div>
 
-            <div class="filter-group">
               <select id="txTypeFilter" class="filter-select">
                 <option value="ALL">All Types</option>
-                <option value="SALE">Sales Only</option>
+                <option value="UNPAID_CREDIT">🔴 Unpaid Credit (Udhaar)</option>
+                <option value="PAID_SALE">🟢 Paid Sales</option>
+                <option value="SALE">All Sales</option>
                 <option value="PURCHASE">Purchases / Restocks</option>
+                <option value="STOCK_CONTRIBUTION">Stock Buying Money</option>
                 <option value="EXPENSE">Operating Expenses</option>
+                <option value="TRANSFER">Settlement Transfers</option>
                 <option value="INJECTION">Partner Capital Injections</option>
                 <option value="DRAWING">Partner Drawings / Payouts</option>
               </select>
@@ -683,31 +686,47 @@
       <form id="saleForm">
         <div class="modal-body">
           <div class="form-grid">
+            <div class="form-group form-full" style="background: var(--bg-surface-elevated); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <label style="font-weight: 700; font-size: 13px; margin-bottom: 8px; display: block;">Payment Status</label>
+              <div style="display: flex; gap: 20px; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600;">
+                  <input type="radio" name="paymentStatus" value="PAID" checked onchange="TransactionsModule.onSalePaymentStatusChange(this.value)">
+                  <span>🟢 Paid Now</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--color-danger);">
+                  <input type="radio" name="paymentStatus" value="UNPAID" onchange="TransactionsModule.onSalePaymentStatusChange(this.value)">
+                  <span>🔴 On Credit / Unpaid (Udhaar)</span>
+                </label>
+              </div>
+            </div>
+
             <div class="form-group">
               <label>Customer Name / Company</label>
-              <input type="text" name="customer" class="form-control" placeholder="e.g. Retail Client / Enterprise Ltd" required>
+              <input type="text" name="customer" id="saleCustomerInput" class="form-control" placeholder="e.g. Rahul / Retail Client" required>
             </div>
             <div class="form-group">
               <label>Sale Date</label>
               <input type="date" name="date" id="saleDate" class="form-control" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="salePartnerAccountGroup">
               <label>Received In (Whose Personal Account / UPI?)</label>
-              <select name="holdingPartnerId" id="salePartnerAccountSelect" class="form-control" required></select>
+              <select name="holdingPartnerId" id="salePartnerAccountSelect" class="form-control"></select>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="salePaymentMethodGroup">
               <label>Payment Method</label>
-              <select name="paymentMethod" class="form-control">
+              <select name="paymentMethod" id="salePaymentMethodSelect" class="form-control">
                 <option value="UPI / QR Code">UPI / QR Code (GPay, PhonePe, Paytm)</option>
                 <option value="Bank Transfer (NEFT/RTGS/IMPS)">Bank Transfer (NEFT / RTGS / IMPS)</option>
                 <option value="Cash">Cash</option>
                 <option value="Credit / Debit Card">Credit / Debit Card</option>
-                <option value="Accounts Receivable">Accounts Receivable (Credit / Dues)</option>
               </select>
+            </div>
+            <div class="form-group form-full" id="saleCreditAlertBox" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 10px 14px; border-radius: var(--radius-md); color: var(--color-danger); font-size: 12.5px;">
+              ⚠️ <strong>Credit Sale (Udhaar):</strong> Stock is deducted immediately. Money will show as <strong>Unpaid Credit</strong> until the customer pays and you click <strong>"Mark Paid"</strong>.
             </div>
             <div class="form-group form-full">
               <label>Notes / Reference</label>
-              <input type="text" name="notes" class="form-control" placeholder="Order Ref or Invoice #">
+              <input type="text" name="notes" class="form-control" placeholder="Order Ref, phone number, or notes">
             </div>
           </div>
 
@@ -743,6 +762,20 @@
         <input type="hidden" name="id" id="editSaleTxId">
         <div class="modal-body">
           <div class="form-grid">
+            <div class="form-group form-full" style="background: var(--bg-surface-elevated); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <label style="font-weight: 700; font-size: 13px; margin-bottom: 8px; display: block;">Payment Status</label>
+              <div style="display: flex; gap: 20px; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600;">
+                  <input type="radio" name="editPaymentStatus" id="editSaleStatusPaid" value="PAID" onchange="TransactionsModule.onEditSalePaymentStatusChange(this.value)">
+                  <span>🟢 Paid</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--color-danger);">
+                  <input type="radio" name="editPaymentStatus" id="editSaleStatusUnpaid" value="UNPAID" onchange="TransactionsModule.onEditSalePaymentStatusChange(this.value)">
+                  <span>🔴 On Credit / Unpaid (Udhaar)</span>
+                </label>
+              </div>
+            </div>
+
             <div class="form-group">
               <label>Customer Name</label>
               <input type="text" name="customer" id="editSaleCustomer" class="form-control" required>
@@ -751,18 +784,17 @@
               <label>Sale Date</label>
               <input type="date" name="date" id="editSaleDate" class="form-control" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="editSalePartnerAccountGroup">
               <label>Received In (Whose Personal Account / UPI?)</label>
-              <select name="holdingPartnerId" id="editSalePartnerAccountSelect" class="form-control" required></select>
+              <select name="holdingPartnerId" id="editSalePartnerAccountSelect" class="form-control"></select>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="editSalePaymentMethodGroup">
               <label>Payment Method</label>
               <select name="paymentMethod" id="editSalePaymentMethod" class="form-control">
                 <option value="UPI / QR Code">UPI / QR Code</option>
                 <option value="Bank Transfer (NEFT/RTGS/IMPS)">Bank Transfer (NEFT / RTGS / IMPS)</option>
                 <option value="Cash">Cash</option>
                 <option value="Credit / Debit Card">Credit / Debit Card</option>
-                <option value="Accounts Receivable">Accounts Receivable</option>
               </select>
             </div>
             <div class="form-group form-full">
@@ -1525,7 +1557,54 @@
     </div>
   </div>
 
-  <!-- 11. SHARE & COLLABORATION MODAL -->
+  <!-- 11. MARK SALE PAID / COLLECT CREDIT MODAL -->
+  <div id="markPaidModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>💵 Collect Payment / Settle Credit</h3>
+          <div class="modal-subtitle">Record payment received for an unpaid credit sale</div>
+        </div>
+        <button class="modal-close-btn" onclick="UI.closeModal('markPaidModal')">✕</button>
+      </div>
+      <form id="markPaidForm">
+        <input type="hidden" name="txId" id="markPaidTxId">
+        <div class="modal-body">
+          <div id="markPaidSummaryBox" style="background: var(--bg-surface-elevated); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 16px;">
+          </div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>Received into (Whose Personal Account / UPI?)</label>
+              <select name="holdingPartnerId" id="markPaidPartnerSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Payment Date</label>
+              <input type="date" name="date" id="markPaidDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Payment Channel</label>
+              <select name="paymentMethod" class="form-control">
+                <option value="UPI / QR Code">UPI / QR Code (GPay, PhonePe, Paytm)</option>
+                <option value="Bank Transfer (NEFT/RTGS/IMPS)">Bank Transfer (NEFT / RTGS / IMPS)</option>
+                <option value="Cash">Cash</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label>Notes / Reference</label>
+              <input type="text" name="notes" id="markPaidNotes" class="form-control" placeholder="e.g. Cleared via GPay / Cash handoff">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="UI.closeModal('markPaidModal')">Cancel</button>
+          <button type="submit" class="btn btn-success">✓ Confirm Payment Collected</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 12. SHARE & COLLABORATION MODAL -->
   <div id="shareModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
@@ -1581,15 +1660,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts with Cache-Busting Version Query -->
-  <script src="js/state.js?v=12.0"></script>
-  <script src="js/accounting.js?v=12.0"></script>
-  <script src="js/ui.js?v=12.0"></script>
-  <script src="js/inventory.js?v=12.0"></script>
-  <script src="js/transactions.js?v=12.0"></script>
-  <script src="js/partners.js?v=12.0"></script>
-  <script src="js/reports.js?v=12.0"></script>
-  <script src="js/audit.js?v=12.0"></script>
-  <script src="js/app.js?v=12.0"></script>
+  <script src="js/state.js?v=13.0"></script>
+  <script src="js/accounting.js?v=13.0"></script>
+  <script src="js/ui.js?v=13.0"></script>
+  <script src="js/inventory.js?v=13.0"></script>
+  <script src="js/transactions.js?v=13.0"></script>
+  <script src="js/partners.js?v=13.0"></script>
+  <script src="js/reports.js?v=13.0"></script>
+  <script src="js/audit.js?v=13.0"></script>
+  <script src="js/app.js?v=13.0"></script>
 
 </body>
 </html>

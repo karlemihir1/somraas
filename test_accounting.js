@@ -198,3 +198,50 @@ if (testProd.stock === 10 && testProd.locationStocks.Varun === 10) {
   console.error('Restock location stock test failed!');
   process.exit(1);
 }
+
+// Test Credit Sale & Mark Paid Settlement
+console.log('\n--- Testing Credit Sale & Mark Paid Settlement ---');
+const creditState = {
+  partners: [
+    { id: 'p_mihir', name: 'Mihir', profitShareRatio: 50, initialCapital: 10000 },
+    { id: 'p_varun', name: 'Varun', profitShareRatio: 50, initialCapital: 10000 }
+  ],
+  products: [{ id: 'p1', name: 'Ballentine', stock: 10, costPrice: 1000 }],
+  transactions: [
+    {
+      id: 'tx_credit_1',
+      type: 'SALE',
+      customer: 'Rahul',
+      paymentStatus: 'UNPAID',
+      amount: 3000,
+      cogs: 2000,
+      items: [{ productId: 'p1', quantity: 2, unitPrice: 1500 }]
+    }
+  ]
+};
+
+let creditSummary = AccountingEngine.calculateFinancials(creditState);
+console.log('Unpaid Credit Amount:', creditSummary.totalUnpaidCredit, '(Expected: 3000)');
+console.log('Mihir Liquid Cash:', creditSummary.partnerSummaries.find(p => p.partnerId === 'p_mihir').netCashHeld, '(Expected: 0)');
+
+if (creditSummary.totalUnpaidCredit !== 3000 || creditSummary.partnerSummaries.find(p => p.partnerId === 'p_mihir').netCashHeld !== 0) {
+  console.error('Credit calculation test failed!');
+  process.exit(1);
+}
+
+// Now mark paid into Mihir's account
+creditState.transactions[0].paymentStatus = 'PAID';
+creditState.transactions[0].holdingPartnerId = 'p_mihir';
+creditState.transactions[0].holdingPartnerName = 'Mihir';
+
+creditSummary = AccountingEngine.calculateFinancials(creditState);
+console.log('After Mark Paid Unpaid Credit:', creditSummary.totalUnpaidCredit, '(Expected: 0)');
+console.log('After Mark Paid Mihir Liquid Cash:', creditSummary.partnerSummaries.find(p => p.partnerId === 'p_mihir').netCashHeld, '(Expected: 3000)');
+
+if (creditSummary.totalUnpaidCredit === 0 && creditSummary.partnerSummaries.find(p => p.partnerId === 'p_mihir').netCashHeld === 3000) {
+  console.log('--- CREDIT SALE & MARK PAID SETTLEMENT VERIFIED 100% ACCURATELY! ---');
+} else {
+  console.error('Mark paid settlement test failed!');
+  process.exit(1);
+}
+
