@@ -87,7 +87,17 @@ const AuditModule = {
 
     tbody.innerHTML = filtered.map(log => {
       let actionBadge = `<span class="badge badge-purchase">${log.action}</span>`;
-      if (log.action.includes('EDIT') || log.action.includes('ADJUST') || log.action.includes('SPLIT')) {
+      if (log.action.includes('SALE')) {
+        actionBadge = `<span class="badge badge-sale">+ SALE</span>`;
+      } else if (log.action.includes('RESTOCK') || log.action.includes('PURCHASE')) {
+        actionBadge = `<span class="badge badge-purchase">📦 RESTOCK</span>`;
+      } else if (log.action.includes('STOCK MONEY') || log.action.includes('CONTRIBUTION') || log.action.includes('INVESTMENT')) {
+        actionBadge = `<span class="badge" style="background: rgba(99, 102, 241, 0.18); color: var(--color-purple); border: 1px solid var(--color-purple); font-weight: 700;">💰 STOCK MONEY</span>`;
+      } else if (log.action.includes('SHIFT')) {
+        actionBadge = `<span class="badge" style="background: rgba(6, 182, 212, 0.18); color: #06b6d4; border: 1px solid #06b6d4; font-weight: 700;">⇄ SHIFT</span>`;
+      } else if (log.action.includes('EXPENSE')) {
+        actionBadge = `<span class="badge badge-expense">💸 EXPENSE</span>`;
+      } else if (log.action.includes('EDIT') || log.action.includes('ADJUST') || log.action.includes('SPLIT')) {
         actionBadge = `<span class="badge badge-drawing">✎ ${log.action}</span>`;
       } else if (log.action.includes('NEW') || log.action.includes('CREATED') || log.action.includes('ADDED')) {
         actionBadge = `<span class="badge badge-sale">+ ${log.action}</span>`;
@@ -109,7 +119,7 @@ const AuditModule = {
             </div>
           </td>
           <td>${actionBadge}</td>
-          <td style="font-size: 13.5px; color: var(--text-secondary); font-weight: 500;">
+          <td style="font-size: 13.5px; color: var(--text-secondary); font-weight: 500; line-height: 1.4;">
             ${log.details}
           </td>
         </tr>

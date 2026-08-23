@@ -994,8 +994,50 @@ class StateStore {
     }
 
     this.state.transactions.unshift(tx);
-    const accountNote = tx.holdingPartnerName ? ` [Personal Account: ${tx.holdingPartnerName}]` : '';
-    this.logActivity(`NEW ${tx.type}`, `Created ${tx.type} entry: ${tx.description} (₹${tx.amount.toLocaleString('en-IN')})${accountNote}`);
+    
+    let activityTitle = `NEW ${tx.type}`;
+    let activityDetails = '';
+
+    if (tx.type === 'SALE') {
+      activityTitle = 'NEW SALE';
+      let itemsListStr = '';
+      if (tx.items && Array.isArray(tx.items) && tx.items.length > 0) {
+        itemsListStr = tx.items.map(i => `${i.quantity}x ${i.productName || 'Item'} @ ₹${Number(i.unitPrice || 0).toLocaleString('en-IN')}`).join(', ');
+      }
+      const customerStr = tx.customer ? ` to ${tx.customer}` : '';
+      const accountStr = tx.holdingPartnerName ? ` [Received in: ${tx.holdingPartnerName}'s Account]` : '';
+      activityDetails = `Sold ${itemsListStr || 'products'}${customerStr} for ₹${Number(tx.amount || 0).toLocaleString('en-IN')}${accountStr}`;
+    } else if (tx.type === 'PURCHASE') {
+      activityTitle = 'NEW RESTOCK';
+      let itemsListStr = '';
+      if (tx.items && Array.isArray(tx.items) && tx.items.length > 0) {
+        itemsListStr = tx.items.map(i => `${i.quantity}x ${i.productName || 'Item'} (Cost: ₹${Number(i.unitCost || 0).toLocaleString('en-IN')})`).join(', ');
+      }
+      const vendorStr = tx.vendor ? ` from ${tx.vendor}` : '';
+      const locStr = tx.location ? ` at 📍 ${tx.location}` : '';
+      activityDetails = `Restocked ${itemsListStr || 'goods'}${vendorStr}${locStr} (Total: ₹${Number(tx.amount || 0).toLocaleString('en-IN')})`;
+    } else if (tx.type === 'STOCK_CONTRIBUTION' || tx.type === 'STOCK_INVESTMENT') {
+      activityTitle = 'STOCK MONEY';
+      let payersStr = '';
+      if (tx.payers && Array.isArray(tx.payers) && tx.payers.length > 0) {
+        payersStr = tx.payers.map(p => `${p.partnerName} (₹${Number(p.amount).toLocaleString('en-IN')})`).join(' + ');
+      } else if (tx.holdingPartnerName) {
+        payersStr = tx.holdingPartnerName;
+      }
+      activityDetails = `Partner money put in for buying stock: ${payersStr} (Total: ₹${Number(tx.amount || 0).toLocaleString('en-IN')})`;
+    } else if (tx.type === 'EXPENSE') {
+      activityTitle = 'NEW EXPENSE';
+      const payerStr = tx.holdingPartnerName ? ` [Paid by: ${tx.holdingPartnerName}]` : '';
+      activityDetails = `Operating expense: ${tx.description || tx.category} (₹${Number(tx.amount || 0).toLocaleString('en-IN')})${payerStr}`;
+    } else if (tx.type === 'TRANSFER') {
+      activityTitle = 'SETTLEMENT TRANSFER';
+      activityDetails = `Settlement transfer: ₹${Number(tx.amount || 0).toLocaleString('en-IN')} from ${tx.fromPartnerName} → ${tx.toPartnerName}`;
+    } else {
+      const accountNote = tx.holdingPartnerName ? ` [Account: ${tx.holdingPartnerName}]` : '';
+      activityDetails = `Created ${tx.type} entry: ${tx.description} (₹${Number(tx.amount || 0).toLocaleString('en-IN')})${accountNote}`;
+    }
+
+    this.logActivity(activityTitle, activityDetails);
     this.saveState();
     return tx;
   }
@@ -1055,7 +1097,27 @@ class StateStore {
     }
 
     this.state.transactions[idx] = newTx;
-    this.logActivity(`EDITED ${oldTx.type}`, `Edited transaction ${oldTx.id}: ${newTx.description} (₹${oldTx.amount} → ₹${newTx.amount}) [Account: ${newTx.holdingPartnerName || 'Personal'}]`);
+
+    let editActivityDetails = '';
+    if (newTx.type === 'SALE') {
+      let itemsListStr = '';
+      if (newTx.items && Array.isArray(newTx.items) && newTx.items.length > 0) {
+        itemsListStr = newTx.items.map(i => `${i.quantity}x ${i.productName || 'Item'} @ ₹${Number(i.unitPrice || 0).toLocaleString('en-IN')}`).join(', ');
+      }
+      const customerStr = newTx.customer ? ` to ${newTx.customer}` : '';
+      const accountStr = newTx.holdingPartnerName ? ` [Account: ${newTx.holdingPartnerName}]` : '';
+      editActivityDetails = `Updated sale${customerStr}: ${itemsListStr || 'items'} (Total: ₹${Number(newTx.amount).toLocaleString('en-IN')})${accountStr}`;
+    } else if (newTx.type === 'PURCHASE') {
+      let itemsListStr = '';
+      if (newTx.items && Array.isArray(newTx.items) && newTx.items.length > 0) {
+        itemsListStr = newTx.items.map(i => `${i.quantity}x ${i.productName || 'Item'}`).join(', ');
+      }
+      editActivityDetails = `Updated restock entry: ${itemsListStr || 'goods'} from ${newTx.vendor || 'Supplier'} (₹${Number(newTx.amount).toLocaleString('en-IN')})`;
+    } else {
+      editActivityDetails = `Edited ${oldTx.type}: ${newTx.description} (₹${oldTx.amount} → ₹${newTx.amount})`;
+    }
+
+    this.logActivity(`EDITED ${oldTx.type}`, editActivityDetails);
     this.saveState();
     return newTx;
   }
@@ -1085,7 +1147,19 @@ class StateStore {
         }
       }
       this.state.transactions = this.state.transactions.filter(t => t.id !== txId);
-      this.logActivity(`DELETED ${tx.type}`, `Voided/deleted transaction ${tx.id}: ${tx.description} (₹${tx.amount.toLocaleString('en-IN')})`);
+
+      let deleteDetails = '';
+      if (tx.type === 'SALE' && tx.items && tx.items.length > 0) {
+        const itemsListStr = tx.items.map(i => `${i.quantity}x ${i.productName || 'Item'}`).join(', ');
+        deleteDetails = `Voided/deleted sale of [${itemsListStr}] to ${tx.customer || 'Customer'} (₹${Number(tx.amount).toLocaleString('en-IN')})`;
+      } else if (tx.type === 'PURCHASE' && tx.items && tx.items.length > 0) {
+        const itemsListStr = tx.items.map(i => `${i.quantity}x ${i.productName || 'Item'}`).join(', ');
+        deleteDetails = `Voided/deleted restock of [${itemsListStr}] from ${tx.vendor || 'Supplier'} (₹${Number(tx.amount).toLocaleString('en-IN')})`;
+      } else {
+        deleteDetails = `Voided/deleted ${tx.type} entry: ${tx.description} (₹${Number(tx.amount).toLocaleString('en-IN')})`;
+      }
+
+      this.logActivity(`DELETED ${tx.type}`, deleteDetails);
       this.saveState();
     }
   }
