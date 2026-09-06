@@ -3,343 +3,1396 @@
  * Supports Multi-Partner Personal Bank / UPI Accounts, Inter-Partner Settlement & Full Audit Trail
  */
 
-const STORAGE_KEY = 'somraas_store_inr_v1';
+const STORAGE_KEY = 'somraas_store_inr_v2';
 const FIREBASE_DB_URL = 'https://somraas-a3f58-default-rtdb.firebaseio.com/somraas_cloud_store.json';
 
 const DEFAULT_INITIAL_STATE = {
-  settings: {
-    businessName: 'Somraas',
-    currencySymbol: '₹',
-    currencyCode: 'INR',
-    taxRatePercent: 0
+  "settings": {
+    "businessName": "Somraas",
+    "currencySymbol": "\u20b9",
+    "currencyCode": "INR",
+    "taxRatePercent": 0
   },
-  expenseCategories: [
-    'Rent & Warehouse',
-    'Salaries & Staff Wages',
-    'Electricity & Utilities',
-    'Marketing & Online Ads',
-    'Logistics & Courier Shipping',
-    'Software & SaaS Tools',
-    'CA, Legal & Accounting Fees',
-    'Repairs & Maintenance',
-    'Tea, Food & Hospitality',
-    'Packaging & Raw Materials',
-    'Miscellaneous Expenses'
+  "expenseCategories": [
+    "Logistics & Courier Shipping",
+    "Stock Purchase",
+    "Partner Settlement",
+    "Rent & Warehouse",
+    "Packaging & Raw Materials",
+    "Miscellaneous Expenses"
   ],
-  activeUser: {
-    id: 'partner_mihir',
-    name: 'Mihir',
-    role: 'Managing Partner',
-    avatar: 'M'
+  "activeUser": {
+    "id": "partner_mihir",
+    "name": "Mihir",
+    "role": "Managing Partner",
+    "avatar": "M"
   },
-  partners: [
+  "partners": [
     {
-      id: 'partner_mihir',
-      name: 'Mihir',
-      role: 'Managing Partner',
-      email: 'mihir@somraas.in',
-      avatar: 'M',
-      color: '#3b82f6',
-      profitShareRatio: 33.4,
-      initialCapital: 0,
-      createdAt: '2026-01-01'
+      "id": "partner_varun",
+      "name": "Varun",
+      "role": "Partner",
+      "email": "varun@somraas.in",
+      "avatar": "V",
+      "color": "#10b981",
+      "profitShareRatio": 33.34,
+      "initialCapital": 0,
+      "createdAt": "2026-08-01"
     },
     {
-      id: 'partner_varun',
-      name: 'Varun',
-      role: 'Operations Partner',
-      email: 'varun@somraas.in',
-      avatar: 'V',
-      color: '#10b981',
-      profitShareRatio: 33.3,
-      initialCapital: 0,
-      createdAt: '2026-01-01'
+      "id": "partner_mihir",
+      "name": "Mihir",
+      "role": "Partner",
+      "email": "mihir@somraas.in",
+      "avatar": "M",
+      "color": "#3b82f6",
+      "profitShareRatio": 33.33,
+      "initialCapital": 0,
+      "createdAt": "2026-08-01"
     },
     {
-      id: 'partner_vaishali',
-      name: 'Vaishali',
-      role: 'Founding Partner',
-      email: 'vaishali@somraas.in',
-      avatar: 'V',
-      color: '#8b5cf6',
-      profitShareRatio: 33.3,
-      initialCapital: 0,
-      createdAt: '2026-01-01'
+      "id": "partner_vaishali",
+      "name": "Vaishali",
+      "role": "Partner",
+      "email": "vaishali@somraas.in",
+      "avatar": "V",
+      "color": "#ec4899",
+      "profitShareRatio": 33.33,
+      "initialCapital": 0,
+      "createdAt": "2026-08-01"
     }
   ],
-  products: [
+  "products": [
     {
-      id: 'prod_1',
-      sku: 'SKU-ELEC-01',
-      name: 'Noise-Canceling Pro Headphones',
-      category: 'Electronics',
-      location: 'Warehouse A - Rack 2 (Top Shelf)',
-      unit: 'pcs',
-      costPrice: 2800.00,
-      stock: 45,
-      minThreshold: 15,
-      createdAt: '2026-01-05'
+      "id": "prod_ballentines",
+      "name": "Ballentines",
+      "category": "Whisky",
+      "costPrice": 1125,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
     },
     {
-      id: 'prod_2',
-      sku: 'SKU-ELEC-02',
-      name: 'Ultra-Slim Mechanical RGB Keyboard',
-      category: 'Electronics',
-      location: 'Warehouse A - Shelf 4B',
-      unit: 'pcs',
-      costPrice: 1950.00,
-      stock: 32,
-      minThreshold: 10,
-      createdAt: '2026-01-05'
+      "id": "prod_minti_jamun",
+      "name": "Minti Jamun",
+      "category": "Vodka",
+      "costPrice": 810,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
     },
     {
-      id: 'prod_3',
-      sku: 'SKU-ACC-03',
-      name: 'USB-C Fast Charging Multi-Hub (100W)',
-      category: 'Accessories',
-      location: 'Main Storefront - Counter Cabinet 1',
-      unit: 'pcs',
-      costPrice: 850.00,
-      stock: 80,
-      minThreshold: 20,
-      createdAt: '2026-01-08'
+      "id": "prod_minti_jamun_smirnoff",
+      "name": "Minti Jamun Smirnoff",
+      "category": "Vodka",
+      "costPrice": 980,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
     },
     {
-      id: 'prod_4',
-      sku: 'SKU-ACC-04',
-      name: 'Ergonomic Wireless Vertical Mouse',
-      category: 'Accessories',
-      location: 'Main Storefront - Display Aisle 3',
-      unit: 'pcs',
-      costPrice: 950.00,
-      stock: 8,
-      minThreshold: 12,
-      createdAt: '2026-01-10'
+      "id": "prod_lemon",
+      "name": "Lemon / Limon",
+      "category": "Vodka",
+      "costPrice": 980,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
     },
     {
-      id: 'prod_5',
-      sku: 'SKU-WRK-05',
-      name: 'Adjustable Aluminum Laptop Stand',
-      category: 'Workstation',
-      location: 'Warehouse B - Storage Bin 12',
-      unit: 'pcs',
-      costPrice: 1100.00,
-      stock: 38,
-      minThreshold: 10,
-      createdAt: '2026-01-12'
+      "id": "prod_mango",
+      "name": "Mango",
+      "category": "Vodka",
+      "costPrice": 980,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0,
+        "Kunal": 0
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_absolute",
+      "name": "Absolute Vodka",
+      "category": "Vodka",
+      "costPrice": 1970,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_jim_beam",
+      "name": "Jim Beam",
+      "category": "Bourbon",
+      "costPrice": 1670,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_ranthambore",
+      "name": "Royal Ranthambore",
+      "category": "Whisky",
+      "costPrice": 1630,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_bombay_sapphire",
+      "name": "Bombay Sapphire",
+      "category": "Gin",
+      "costPrice": 1690,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
     }
   ],
-  transactions: [
+  "transactions": [
     {
-      id: 'tx_init_1',
-      type: 'INJECTION',
-      date: '2026-01-01',
-      recordedBy: 'Aarav Sharma',
-      partnerId: 'partner_aarav',
-      partnerName: 'Aarav Sharma',
-      holdingPartnerId: 'partner_aarav',
-      holdingPartnerName: 'Aarav Sharma',
-      category: 'Capital Contribution',
-      description: 'Initial Equity Contribution by Aarav (in Aarav\'s Account)',
-      amount: 500000.00,
-      cogs: 0,
-      stockImpact: 0,
-      paymentMethod: 'Personal Bank Account',
-      notes: 'Initial capital in Aarav\'s personal account'
+      "id": "tx_1001",
+      "type": "PURCHASE",
+      "date": "2026-08-05",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Batch 1 (Varun paid)",
+      "amount": 9800,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "stockImpact": 9,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Varun"
     },
     {
-      id: 'tx_init_2',
-      type: 'INJECTION',
-      date: '2026-01-01',
-      recordedBy: 'Sneha Patel',
-      partnerId: 'partner_sneha',
-      partnerName: 'Sneha Patel',
-      holdingPartnerId: 'partner_sneha',
-      holdingPartnerName: 'Sneha Patel',
-      category: 'Capital Contribution',
-      description: 'Initial Equity Contribution by Sneha (in Sneha\'s Account)',
-      amount: 350000.00,
-      cogs: 0,
-      stockImpact: 0,
-      paymentMethod: 'Personal Bank Account',
-      notes: 'Initial capital in Sneha\'s personal account'
-    },
-    {
-      id: 'tx_init_3',
-      type: 'INJECTION',
-      date: '2026-01-01',
-      recordedBy: 'Rohan Verma',
-      partnerId: 'partner_rohan',
-      partnerName: 'Rohan Verma',
-      holdingPartnerId: 'partner_rohan',
-      holdingPartnerName: 'Rohan Verma',
-      category: 'Capital Contribution',
-      description: 'Initial Equity Contribution by Rohan (in Rohan\'s Account)',
-      amount: 250000.00,
-      cogs: 0,
-      stockImpact: 0,
-      paymentMethod: 'Personal Bank Account',
-      notes: 'Initial capital in Rohan\'s personal account'
-    },
-    {
-      id: 'tx_restock_1',
-      type: 'PURCHASE',
-      date: '2026-01-05',
-      recordedBy: 'Sneha Patel',
-      holdingPartnerId: 'partner_sneha',
-      holdingPartnerName: 'Sneha Patel',
-      vendor: 'TechZone Wholesale Distributors Mumbai',
-      category: 'Inventory Restock',
-      description: 'Bulk opening batch: Headphones, Keyboards, Hubs, Stands',
-      amount: 380000.00,
-      cogs: 0,
-      stockImpact: 220,
-      items: [
-        { productId: 'prod_1', productName: 'Noise-Canceling Pro Headphones', quantity: 60, unitCost: 2800.00, totalCost: 168000.00 },
-        { productId: 'prod_2', productName: 'Ultra-Slim Mechanical RGB Keyboard', quantity: 50, unitCost: 1950.00, totalCost: 97500.00 },
-        { productId: 'prod_3', productName: 'USB-C Fast Charging Multi-Hub (100W)', quantity: 100, unitCost: 850.00, totalCost: 85000.00 },
-        { productId: 'prod_5', productName: 'Adjustable Aluminum Laptop Stand', quantity: 45, unitCost: 1100.00, totalCost: 49500.00 }
+      "id": "tx_1012",
+      "type": "SALE",
+      "date": "2026-08-06",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1250,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1250,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
       ],
-      paymentMethod: 'Sneha\'s Personal HDFC Account',
-      notes: 'Paid from Sneha\'s personal account'
+      "recordedBy": "Varun"
     },
     {
-      id: 'tx_exp_1',
-      type: 'EXPENSE',
-      date: '2026-01-10',
-      recordedBy: 'Aarav Sharma',
-      holdingPartnerId: 'partner_aarav',
-      holdingPartnerName: 'Aarav Sharma',
-      category: 'Rent & Warehouse',
-      description: 'Q1 Commercial Warehouse & Office Rent',
-      amount: 45000.00,
-      cogs: 0,
-      stockImpact: 0,
-      paymentMethod: 'Aarav\'s Personal Bank Transfer',
-      paidTo: 'Apex Realty Properties'
-    },
-    {
-      id: 'tx_exp_2',
-      type: 'EXPENSE',
-      date: '2026-01-15',
-      recordedBy: 'Rohan Verma',
-      holdingPartnerId: 'partner_rohan',
-      holdingPartnerName: 'Rohan Verma',
-      category: 'Marketing & Online Ads',
-      description: 'Google Ads & Digital Performance Marketing',
-      amount: 22500.00,
-      cogs: 0,
-      stockImpact: 0,
-      paymentMethod: 'Rohan\'s Personal Credit Card',
-      paidTo: 'Digital Media Agency'
-    },
-    {
-      id: 'tx_exp_3',
-      type: 'EXPENSE',
-      date: '2026-01-20',
-      recordedBy: 'Sneha Patel',
-      holdingPartnerId: 'partner_sneha',
-      holdingPartnerName: 'Sneha Patel',
-      category: 'Logistics & Courier Shipping',
-      description: 'Courier shipments & packaging materials',
-      amount: 14200.00,
-      cogs: 0,
-      stockImpact: 0,
-      paymentMethod: 'Sneha\'s Personal UPI (GPay)',
-      paidTo: 'Bluedart Logistics'
-    },
-    {
-      id: 'tx_sale_1',
-      type: 'SALE',
-      date: '2026-01-24',
-      recordedBy: 'Sneha Patel',
-      holdingPartnerId: 'partner_sneha',
-      holdingPartnerName: 'Sneha Patel',
-      customer: 'Infosys Tech Park Client',
-      category: 'Product Sales',
-      description: 'Corporate order: 10x Headphones, 12x Keyboards',
-      amount: 110388.00,
-      cogs: 51400.00,
-      grossProfit: 58988.00,
-      stockImpact: -22,
-      items: [
-        { productId: 'prod_1', productName: 'Noise-Canceling Pro Headphones', quantity: 10, unitPrice: 5999.00, unitCost: 2800.00, lineTotal: 59990.00 },
-        { productId: 'prod_2', productName: 'Ultra-Slim Mechanical RGB Keyboard', quantity: 12, unitPrice: 4200.00, unitCost: 1950.00, lineTotal: 50400.00 }
+      "id": "tx_1013",
+      "type": "SALE",
+      "date": "2026-08-06",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1850,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1850,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
       ],
-      paymentMethod: 'Received in Sneha\'s Account',
-      notes: 'Customer transferred to Sneha\'s HDFC'
+      "recordedBy": "Varun"
     },
     {
-      id: 'tx_sale_2',
-      type: 'SALE',
-      date: '2026-02-02',
-      recordedBy: 'Aarav Sharma',
-      holdingPartnerId: 'partner_aarav',
-      holdingPartnerName: 'Aarav Sharma',
-      customer: 'Studio 99 Coworking Space',
-      category: 'Product Sales',
-      description: 'Order: 20x USB Hubs, 15x Laptop Stands',
-      amount: 81965.00,
-      cogs: 33500.00,
-      grossProfit: 48465.00,
-      stockImpact: -35,
-      items: [
-        { productId: 'prod_3', productName: 'USB-C Fast Charging Multi-Hub (100W)', quantity: 20, unitPrice: 1999.00, unitCost: 850.00, lineTotal: 39980.00 },
-        { productId: 'prod_5', productName: 'Adjustable Aluminum Laptop Stand', quantity: 15, unitPrice: 2799.00, unitCost: 1100.00, lineTotal: 41985.00 }
+      "id": "tx_1014",
+      "type": "SALE",
+      "date": "2026-08-06",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1900,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1900,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
       ],
-      paymentMethod: 'Received in Aarav\'s UPI (PhonePe)',
-      notes: 'Customer scanned Aarav\'s QR'
+      "recordedBy": "Varun"
     },
     {
-      id: 'tx_sale_3',
-      type: 'SALE',
-      date: '2026-02-12',
-      recordedBy: 'Rohan Verma',
-      holdingPartnerId: 'partner_rohan',
-      holdingPartnerName: 'Rohan Verma',
-      customer: 'Online Store Shoppers Mumbai',
-      category: 'Product Sales',
-      description: 'Direct D2C Online Store Sales Batch',
-      amount: 95400.00,
-      cogs: 42100.00,
-      grossProfit: 53300.00,
-      stockImpact: -28,
-      items: [
-        { productId: 'prod_1', productName: 'Noise-Canceling Pro Headphones', quantity: 8, unitPrice: 5999.00, unitCost: 2800.00, lineTotal: 47992.00 },
-        { productId: 'prod_2', productName: 'Ultra-Slim Mechanical RGB Keyboard', quantity: 6, unitPrice: 4200.00, unitCost: 1950.00, lineTotal: 25200.00 },
-        { productId: 'prod_4', productName: 'Ergonomic Wireless Vertical Mouse', quantity: 9, unitPrice: 2450.00, unitCost: 950.00, lineTotal: 22050.00 }
+      "id": "tx_1002",
+      "type": "PURCHASE",
+      "date": "2026-08-07",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Batch 2 (Mihir paid)",
+      "amount": 7510,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "stockImpact": 6,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1009",
+      "type": "EXPENSE",
+      "date": "2026-08-07",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery (Mihir paid)",
+      "amount": 200,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1015",
+      "type": "SALE",
+      "date": "2026-08-07",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1850,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1850,
+          "unitCost": 1125,
+          "location": "Mihir"
+        }
       ],
-      paymentMethod: 'Received in Rohan\'s Razorpay/Bank',
-      notes: 'Settled to Rohan\'s ICICI account'
+      "recordedBy": "Mihir"
     },
     {
-      id: 'tx_draw_1',
-      type: 'DRAWING',
-      date: '2026-02-10',
-      recordedBy: 'Aarav Sharma',
-      partnerId: 'partner_aarav',
-      partnerName: 'Aarav Sharma',
-      holdingPartnerId: 'partner_aarav',
-      holdingPartnerName: 'Aarav Sharma',
-      category: 'Partner Drawings',
-      description: 'Interim Profit Drawing kept by Aarav',
-      amount: 25000.00,
-      cogs: 0,
-      stockImpact: 0,
-      paymentMethod: 'Retained from Sales',
-      notes: 'Kept from collected sales cash'
+      "id": "tx_1016",
+      "type": "SALE",
+      "date": "2026-08-07",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1850,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1850,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1017",
+      "type": "SALE",
+      "date": "2026-08-07",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1900,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1900,
+          "unitCost": 1125,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1018",
+      "type": "SALE",
+      "date": "2026-08-08",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1800,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1800,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1019",
+      "type": "SALE",
+      "date": "2026-08-08",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1900,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1900,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1020",
+      "type": "SALE",
+      "date": "2026-08-08",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1900,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1900,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1003",
+      "type": "PURCHASE",
+      "date": "2026-08-09",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Batch 3 (Mihir paid)",
+      "amount": 5880,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "stockImpact": 6,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1010",
+      "type": "EXPENSE",
+      "date": "2026-08-09",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery (Mihir paid)",
+      "amount": 150,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1021",
+      "type": "SALE",
+      "date": "2026-08-09",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 1900,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1900,
+          "unitCost": 1125,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1022",
+      "type": "SALE",
+      "date": "2026-08-09",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1900,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1900,
+          "unitCost": 1125,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1023",
+      "type": "SALE",
+      "date": "2026-08-09",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1900,
+      "cogs": 1125,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1900,
+          "unitCost": 1125,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1004",
+      "type": "PURCHASE",
+      "date": "2026-08-10",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Batch 4 (Vaishali paid)",
+      "amount": 3700,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "stockImpact": 3,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_1008",
+      "type": "EXPENSE",
+      "date": "2026-08-10",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery (Vaishali paid)",
+      "amount": 1200,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI",
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_1024",
+      "type": "SALE",
+      "date": "2026-08-10",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 810,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun",
+          "productName": "Minti Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 810,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1025",
+      "type": "SALE",
+      "date": "2026-08-10",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 810,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun",
+          "productName": "Minti Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 810,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1026",
+      "type": "SALE",
+      "date": "2026-08-10",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Lemon (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Lemon",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1027",
+      "type": "SALE",
+      "date": "2026-08-10",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Lemon (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Lemon",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1051",
+      "type": "TRANSFER",
+      "date": "2026-08-10",
+      "category": "Partner Settlement",
+      "description": "Inter-Partner Transfer: Mihir to Varun",
+      "amount": 450,
+      "fromPartnerId": "partner_mihir",
+      "fromPartnerName": "Mihir",
+      "toPartnerId": "partner_varun",
+      "toPartnerName": "Varun",
+      "paymentMethod": "UPI / Bank",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1052",
+      "type": "TRANSFER",
+      "date": "2026-08-10",
+      "category": "Partner Settlement",
+      "description": "Inter-Partner Transfer: Mihir to Vaishali",
+      "amount": 3000,
+      "fromPartnerId": "partner_mihir",
+      "fromPartnerName": "Mihir",
+      "toPartnerId": "partner_vaishali",
+      "toPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Bank",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1028",
+      "type": "SALE",
+      "date": "2026-08-11",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Absolute (From: Varun)",
+      "customer": "Customer",
+      "amount": 2800,
+      "cogs": 1970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_absolute",
+          "productName": "Absolute",
+          "quantity": 1,
+          "unitPrice": 2800,
+          "unitCost": 1970,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1029",
+      "type": "SALE",
+      "date": "2026-08-11",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango (From: Varun)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Mango",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1030",
+      "type": "SALE",
+      "date": "2026-08-11",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango (From: Kunal)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Mango",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Kunal"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1005",
+      "type": "PURCHASE",
+      "date": "2026-08-12",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Batch 5 (Varun paid)",
+      "amount": 5440,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "stockImpact": 5,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1031",
+      "type": "SALE",
+      "date": "2026-08-12",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1032",
+      "type": "SALE",
+      "date": "2026-08-12",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1033",
+      "type": "SALE",
+      "date": "2026-08-12",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1034",
+      "type": "SALE",
+      "date": "2026-08-12",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_1035",
+      "type": "SALE",
+      "date": "2026-08-12",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1036",
+      "type": "SALE",
+      "date": "2026-08-13",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1037",
+      "type": "SALE",
+      "date": "2026-08-13",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jim Beam (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1670,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jim_beam",
+          "productName": "Jim Beam",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1670,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1038",
+      "type": "SALE",
+      "date": "2026-08-13",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jim Beam (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1670,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jim_beam",
+          "productName": "Jim Beam",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1670,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1006",
+      "type": "PURCHASE",
+      "date": "2026-08-14",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Batch 6 (Varun paid)",
+      "amount": 5000,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "stockImpact": 5,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1011",
+      "type": "EXPENSE",
+      "date": "2026-08-14",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery (Varun paid)",
+      "amount": 200,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1039",
+      "type": "SALE",
+      "date": "2026-08-14",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 1050,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 1050,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1040",
+      "type": "SALE",
+      "date": "2026-08-14",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 1050,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 1050,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1041",
+      "type": "SALE",
+      "date": "2026-08-14",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Royal Ramthambore (From: Varun)",
+      "customer": "Customer",
+      "amount": 470,
+      "cogs": 0,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ranthambore",
+          "productName": "Royal Ramthambore",
+          "quantity": 1,
+          "unitPrice": 470,
+          "unitCost": 0,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1007",
+      "type": "PURCHASE",
+      "date": "2026-08-15",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Batch 7 (Mihir paid)",
+      "amount": 6150,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "stockImpact": 5,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1042",
+      "type": "SALE",
+      "date": "2026-08-15",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Varun)",
+      "customer": "Customer",
+      "amount": 1450,
+      "cogs": 1050,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1450,
+          "unitCost": 1050,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1043",
+      "type": "SALE",
+      "date": "2026-08-15",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Varun)",
+      "customer": "Customer",
+      "amount": 1450,
+      "cogs": 1050,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1450,
+          "unitCost": 1050,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1044",
+      "type": "SALE",
+      "date": "2026-08-15",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Varun)",
+      "customer": "Customer",
+      "amount": 1450,
+      "cogs": 1050,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1450,
+          "unitCost": 1050,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1045",
+      "type": "SALE",
+      "date": "2026-08-15",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Minti Jamun Smrinoff (From: Varun)",
+      "customer": "Customer",
+      "amount": 1450,
+      "cogs": 1050,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Minti Jamun Smrinoff",
+          "quantity": 1,
+          "unitPrice": 1450,
+          "unitCost": 1050,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1046",
+      "type": "SALE",
+      "date": "2026-08-16",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jim Bean (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2200,
+      "cogs": 1670,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jim_beam",
+          "productName": "Jim Bean",
+          "quantity": 1,
+          "unitPrice": 2200,
+          "unitCost": 1670,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1047",
+      "type": "SALE",
+      "date": "2026-08-16",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Royal Ramthambore (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1630,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ranthambore",
+          "productName": "Royal Ramthambore",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1630,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1048",
+      "type": "SALE",
+      "date": "2026-08-16",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bombay Sapphire (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1690,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_bombay_sapphire",
+          "productName": "Bombay Sapphire",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1690,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_1053",
+      "type": "TRANSFER",
+      "date": "2026-08-16",
+      "category": "Partner Settlement",
+      "description": "Inter-Partner Transfer: Varun to Mihir",
+      "amount": 1440,
+      "fromPartnerId": "partner_varun",
+      "fromPartnerName": "Varun",
+      "toPartnerId": "partner_mihir",
+      "toPartnerName": "Mihir",
+      "paymentMethod": "UPI / Bank",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1054",
+      "type": "TRANSFER",
+      "date": "2026-08-16",
+      "category": "Partner Settlement",
+      "description": "Inter-Partner Transfer: Varun to Vaishali",
+      "amount": 1511,
+      "fromPartnerId": "partner_varun",
+      "fromPartnerName": "Varun",
+      "toPartnerId": "partner_vaishali",
+      "toPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Bank",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1049",
+      "type": "SALE",
+      "date": "2026-08-17",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango (From: Varun)",
+      "customer": "Customer",
+      "amount": 1500,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Mango",
+          "quantity": 1,
+          "unitPrice": 1500,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_1050",
+      "type": "SALE",
+      "date": "2026-08-17",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Limon (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Limon",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Vaishali"
     }
   ],
-  auditLogs: [
+  "auditLogs": [
     {
-      id: 'log_init_1',
-      timestamp: '2026-02-14 10:30 AM',
-      user: 'Aarav Sharma',
-      action: 'SYSTEM INITIALIZED',
-      details: 'Initial system setup with Personal Account Tracking and Partner Cash Settlement engine.'
+      "id": "log_init",
+      "timestamp": "2026-09-06T15:35:21.990Z",
+      "action": "DATA_IMPORT",
+      "user": "Mihir",
+      "details": "Cleared old records and initialized 39 sales, 7 stock purchases, 4 transport expenses, and 4 partner transfers from verified business sheets"
     }
-  ],
-  selectedPeriod: 'ALL'
+  ]
 };
 
 class StateStore {
