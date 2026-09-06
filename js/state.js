@@ -3,7 +3,7 @@
  * Supports Multi-Partner Personal Bank / UPI Accounts, Inter-Partner Settlement & Full Audit Trail
  */
 
-const STORAGE_KEY = 'somraas_store_inr_v2';
+const STORAGE_KEY = 'somraas_store_inr_v3';
 const FIREBASE_DB_URL = 'https://somraas-a3f58-default-rtdb.firebaseio.com/somraas_cloud_store.json';
 
 const DEFAULT_INITIAL_STATE = {
@@ -67,72 +67,84 @@ const DEFAULT_INITIAL_STATE = {
       "id": "prod_ballentines",
       "name": "Ballentines",
       "category": "Whisky",
-      "costPrice": 1125,
-      "stock": 0,
+      "costPrice": 1500,
+      "stock": 5,
       "locationStocks": {
-        "Varun": 0,
-        "Mihir": 0
+        "Varun": 3,
+        "Mihir": 2
       },
       "minThreshold": 2
     },
     {
-      "id": "prod_minti_jamun",
-      "name": "Minti Jamun",
-      "category": "Vodka",
-      "costPrice": 810,
-      "stock": 0,
+      "id": "prod_jameson",
+      "name": "Jameson Irish Whiskey",
+      "category": "Whisky",
+      "costPrice": 2100,
+      "stock": 5,
       "locationStocks": {
-        "Varun": 0,
-        "Mihir": 0
+        "Varun": 3,
+        "Mihir": 2
       },
       "minThreshold": 2
     },
     {
-      "id": "prod_minti_jamun_smirnoff",
-      "name": "Minti Jamun Smirnoff",
-      "category": "Vodka",
-      "costPrice": 980,
-      "stock": 0,
+      "id": "prod_red_label",
+      "name": "Red Label",
+      "category": "Whisky",
+      "costPrice": 1500,
+      "stock": 3,
       "locationStocks": {
-        "Varun": 0,
+        "Varun": 3,
         "Mihir": 0
       },
       "minThreshold": 2
     },
     {
       "id": "prod_lemon",
-      "name": "Lemon / Limon",
-      "category": "Vodka",
-      "costPrice": 980,
-      "stock": 0,
+      "name": "Bacardi Limon",
+      "category": "Rum",
+      "costPrice": 940,
+      "stock": 2,
       "locationStocks": {
-        "Varun": 0,
+        "Varun": 2,
         "Mihir": 0
       },
       "minThreshold": 2
     },
     {
       "id": "prod_mango",
-      "name": "Mango",
+      "name": "Bacardi Mango Chilli",
+      "category": "Rum",
+      "costPrice": 980,
+      "stock": 4,
+      "locationStocks": {
+        "Varun": 2,
+        "Mihir": 2
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_minti_jamun_smirnoff",
+      "name": "Smirnoff Minty Jamun",
+      "category": "Vodka",
+      "costPrice": 980,
+      "stock": 5,
+      "locationStocks": {
+        "Varun": 3,
+        "Mihir": 2
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_mango_mirchi",
+      "name": "Smirnoff Mango Mirchi",
       "category": "Vodka",
       "costPrice": 980,
       "stock": 0,
       "locationStocks": {
         "Varun": 0,
         "Mihir": 0,
-        "Kunal": 0
-      },
-      "minThreshold": 2
-    },
-    {
-      "id": "prod_absolute",
-      "name": "Absolute Vodka",
-      "category": "Vodka",
-      "costPrice": 1970,
-      "stock": 0,
-      "locationStocks": {
-        "Varun": 0,
-        "Mihir": 0
+        "Ishan": 0
       },
       "minThreshold": 2
     },
@@ -140,7 +152,55 @@ const DEFAULT_INITIAL_STATE = {
       "id": "prod_jim_beam",
       "name": "Jim Beam",
       "category": "Bourbon",
-      "costPrice": 1670,
+      "costPrice": 1580,
+      "stock": 2,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 2
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_rockford",
+      "name": "Rockford Classic Whisky",
+      "category": "Whisky",
+      "costPrice": 1050,
+      "stock": 3,
+      "locationStocks": {
+        "Varun": 1,
+        "Mihir": 2
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_bombay_sapphire",
+      "name": "Bombay Sapphire",
+      "category": "Gin",
+      "costPrice": 2100,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_absolute",
+      "name": "Absolute Vodka",
+      "category": "Vodka",
+      "costPrice": 1870,
+      "stock": 0,
+      "locationStocks": {
+        "Varun": 0,
+        "Mihir": 0
+      },
+      "minThreshold": 2
+    },
+    {
+      "id": "prod_bacardi_black",
+      "name": "Bacardi Black",
+      "category": "Rum",
+      "costPrice": 760,
       "stock": 0,
       "locationStocks": {
         "Varun": 0,
@@ -153,18 +213,6 @@ const DEFAULT_INITIAL_STATE = {
       "name": "Royal Ranthambore",
       "category": "Whisky",
       "costPrice": 1630,
-      "stock": 0,
-      "locationStocks": {
-        "Varun": 0,
-        "Mihir": 0
-      },
-      "minThreshold": 2
-    },
-    {
-      "id": "prod_bombay_sapphire",
-      "name": "Bombay Sapphire",
-      "category": "Gin",
-      "costPrice": 1690,
       "stock": 0,
       "locationStocks": {
         "Varun": 0,
@@ -1382,6 +1430,2291 @@ const DEFAULT_INITIAL_STATE = {
         }
       ],
       "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2001",
+      "type": "PURCHASE",
+      "date": "2026-08-19",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 19-Aug: 7 bottles (5x Smirnoff Jamun, 2x Bacardi Mango)",
+      "amount": 6910,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "stockImpact": 7,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2002",
+      "type": "PURCHASE",
+      "date": "2026-08-21",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 21-Aug: 12 bottles (6x Jameson, 6x Red Label)",
+      "amount": 21600,
+      "payers": [
+        {
+          "partnerId": "partner_varun",
+          "partnerName": "Varun",
+          "amount": 9600
+        },
+        {
+          "partnerId": "partner_vaishali",
+          "partnerName": "Vaishali",
+          "amount": 12000
+        }
+      ],
+      "stockImpact": 12,
+      "paymentMethod": "Split UPI / Bank Transfer",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2003",
+      "type": "PURCHASE",
+      "date": "2026-08-22",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 22-Aug: 12 bottles (6x Smirnoff, 2x Mango Mirchi, 2x Bacardi Mango, 2x Limon)",
+      "amount": 11720,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "stockImpact": 12,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2004",
+      "type": "PURCHASE",
+      "date": "2026-08-24",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 24-Aug: 12 bottles (10x Smirnoff Jamun, 2x Mango Mirchi)",
+      "amount": 11710,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "stockImpact": 12,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2005",
+      "type": "PURCHASE",
+      "date": "2026-08-29",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 29-Aug-A: 8 bottles (Jameson Irish Whiskey)",
+      "amount": 7810,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "stockImpact": 8,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2006",
+      "type": "PURCHASE",
+      "date": "2026-08-29",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 29-Aug-B: 23 bottles (Ballentines, Red Label, Smirnoff, Bacardi)",
+      "amount": 39300,
+      "payers": [
+        {
+          "partnerId": "partner_mihir",
+          "partnerName": "Mihir",
+          "amount": 17400
+        },
+        {
+          "partnerId": "partner_varun",
+          "partnerName": "Varun",
+          "amount": 21900
+        }
+      ],
+      "stockImpact": 23,
+      "paymentMethod": "Split UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2007",
+      "type": "PURCHASE",
+      "date": "2026-08-30",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 30-Aug: 4 bottles (Bombay Sapphire, Bacardi Mango, Limon)",
+      "amount": 5000,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "stockImpact": 4,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2008",
+      "type": "PURCHASE",
+      "date": "2026-09-03",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 03-Sep: 25 bottles (Bombay, Absolute, Jim Beam, Rockford, Bacardi, Smirnoff)",
+      "amount": 23680,
+      "payers": [
+        {
+          "partnerId": "partner_varun",
+          "partnerName": "Varun",
+          "amount": 12910
+        },
+        {
+          "partnerId": "partner_mihir",
+          "partnerName": "Mihir",
+          "amount": 10770
+        }
+      ],
+      "stockImpact": 25,
+      "paymentMethod": "Split UPI / Bank Transfer",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2009",
+      "type": "PURCHASE",
+      "date": "2026-09-05",
+      "category": "Stock Purchase",
+      "description": "Stock Purchase Lot 05-Sep: 5 bottles (Smirnoff Minty Jamun, Bacardi Mango Chilli)",
+      "amount": 9730,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "stockImpact": 5,
+      "paymentMethod": "UPI / Bank Transfer",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2011",
+      "type": "EXPENSE",
+      "date": "2026-08-21",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery Lot 21-Aug (Varun paid)",
+      "amount": 500,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2012",
+      "type": "EXPENSE",
+      "date": "2026-08-22",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery Lot 22-Aug (Varun paid)",
+      "amount": 50,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2013",
+      "type": "EXPENSE",
+      "date": "2026-08-24",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery Lot 24-Aug (Mihir paid)",
+      "amount": 50,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2014",
+      "type": "EXPENSE",
+      "date": "2026-08-29",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery Lot 29-Aug (Mihir paid)",
+      "amount": 700,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2015",
+      "type": "EXPENSE",
+      "date": "2026-08-30",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery Lot 30-Aug (Mihir paid)",
+      "amount": 150,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2016",
+      "type": "EXPENSE",
+      "date": "2026-09-03",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery Lot 03-Sep (Varun paid)",
+      "amount": 50,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2017",
+      "type": "EXPENSE",
+      "date": "2026-09-05",
+      "category": "Logistics & Courier Shipping",
+      "description": "Goods Transport / Delivery Lot 05-Sep (Mihir paid)",
+      "amount": 70,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2021",
+      "type": "SALE",
+      "date": "2026-08-19",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 990,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 990,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2022",
+      "type": "SALE",
+      "date": "2026-08-19",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 990,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 990,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2023",
+      "type": "SALE",
+      "date": "2026-08-19",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 990,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 990,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2024",
+      "type": "SALE",
+      "date": "2026-08-19",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 990,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 990,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2025",
+      "type": "SALE",
+      "date": "2026-08-19",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 990,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 990,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2026",
+      "type": "SALE",
+      "date": "2026-08-19",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2027",
+      "type": "SALE",
+      "date": "2026-08-19",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2028",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2600,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2600,
+          "unitCost": 2100,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2029",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2600,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2600,
+          "unitCost": 2100,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2030",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2600,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2600,
+          "unitCost": 2100,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2031",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Varun)",
+      "customer": "Customer",
+      "amount": 2600,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2600,
+          "unitCost": 2100,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2032",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Varun)",
+      "customer": "Customer",
+      "amount": 2800,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2800,
+          "unitCost": 2100,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2033",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2600,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2600,
+          "unitCost": 2100,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2034",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Red Label (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_red_label",
+          "productName": "Red Label",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2035",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Red Label (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_red_label",
+          "productName": "Red Label",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2036",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Red Label (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2100,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_red_label",
+          "productName": "Red Label",
+          "quantity": 1,
+          "unitPrice": 2100,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2037",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Red Label (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2100,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_red_label",
+          "productName": "Red Label",
+          "quantity": 1,
+          "unitPrice": 2100,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2038",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Red Label (From: Varun)",
+      "customer": "Customer",
+      "amount": 2100,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_red_label",
+          "productName": "Red Label",
+          "quantity": 1,
+          "unitPrice": 2100,
+          "unitCost": 1500,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2039",
+      "type": "SALE",
+      "date": "2026-08-21",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Red Label (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_red_label",
+          "productName": "Red Label",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2040",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2041",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2042",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1050,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1050,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2043",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1050,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1050,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2044",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2045",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2046",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango Mirchi Smirnoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango_mirchi",
+          "productName": "Mango Mirchi Smirnoff",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2047",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango Mirchi Smirnoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_vaishali",
+      "holdingPartnerName": "Vaishali",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango_mirchi",
+          "productName": "Mango Mirchi Smirnoff",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Vaishali"
+    },
+    {
+      "id": "tx_2048",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 970,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2049",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 970,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2050",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 970,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2051",
+      "type": "SALE",
+      "date": "2026-08-22",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 970,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2052",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2053",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2054",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2055",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2056",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Ishan)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Ishan"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2057",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Ishan)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Ishan"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2058",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Ishan)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 980,
+          "location": "Ishan"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2059",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2060",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1250,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1250,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2061",
+      "type": "SALE",
+      "date": "2026-09-01",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango Mirchi Smirnoff (From: Ishan)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango_mirchi",
+          "productName": "Mango Mirchi Smirnoff",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 980,
+          "location": "Ishan"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2062",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango Mirchi Smirnoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango_mirchi",
+          "productName": "Mango Mirchi Smirnoff",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2063",
+      "type": "SALE",
+      "date": "2026-09-02",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Varun)",
+      "customer": "Customer",
+      "amount": 2600,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2600,
+          "unitCost": 2100,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2064",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Varun)",
+      "customer": "Customer",
+      "amount": 2300,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2300,
+          "unitCost": 2100,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2065",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Jameson (From: Varun)",
+      "customer": "Customer",
+      "amount": 2300,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_jameson",
+          "productName": "Jameson",
+          "quantity": 1,
+          "unitPrice": 2300,
+          "unitCost": 2100,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2066",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1800,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1800,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2067",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1800,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1800,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2068",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1800,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1800,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2069",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1800,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1800,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2070",
+      "type": "SALE",
+      "date": "2026-08-29",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1500,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2071",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Varun)",
+      "customer": "Customer",
+      "amount": 2000,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 2000,
+          "unitCost": 1500,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2072",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Ballentines (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1800,
+      "cogs": 1500,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_ballentines",
+          "productName": "Ballentines",
+          "quantity": 1,
+          "unitPrice": 1800,
+          "unitCost": 1500,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2073",
+      "type": "SALE",
+      "date": "2026-09-01",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2074",
+      "type": "SALE",
+      "date": "2026-09-02",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Varun)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2075",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2076",
+      "type": "SALE",
+      "date": "2026-09-02",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1350,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1350,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2077",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 970,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2078",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 970,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2079",
+      "type": "SALE",
+      "date": "2026-09-01",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 970,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2080",
+      "type": "SALE",
+      "date": "2026-09-01",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Varun)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2081",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2082",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2083",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bombay Sapphire (From: Mihir)",
+      "customer": "Customer",
+      "amount": 2200,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_bombay_sapphire",
+          "productName": "Bombay Sapphire",
+          "quantity": 1,
+          "unitPrice": 2200,
+          "unitCost": 2100,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2084",
+      "type": "SALE",
+      "date": "2026-08-30",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 970,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 970,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2085",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bombay Sapphire (From: Varun)",
+      "customer": "Customer",
+      "amount": 2300,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_bombay_sapphire",
+          "productName": "Bombay Sapphire",
+          "quantity": 1,
+          "unitPrice": 2300,
+          "unitCost": 2100,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2086",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bombay Sapphire (From: Varun)",
+      "customer": "Customer",
+      "amount": 2300,
+      "cogs": 2100,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_bombay_sapphire",
+          "productName": "Bombay Sapphire",
+          "quantity": 1,
+          "unitPrice": 2300,
+          "unitCost": 2100,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2087",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Absolute (From: Varun)",
+      "customer": "Customer",
+      "amount": 2200,
+      "cogs": 1870,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_absolute",
+          "productName": "Absolute",
+          "quantity": 1,
+          "unitPrice": 2200,
+          "unitCost": 1870,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2088",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Black (From: Varun)",
+      "customer": "Customer",
+      "amount": 900,
+      "cogs": 760,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_bacardi_black",
+          "productName": "Bacardi Black",
+          "quantity": 1,
+          "unitPrice": 900,
+          "unitCost": 760,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2089",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Varun)",
+      "customer": "Customer",
+      "amount": 1250,
+      "cogs": 940,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1250,
+          "unitCost": 940,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2090",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Varun)",
+      "customer": "Customer",
+      "amount": 1250,
+      "cogs": 940,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1250,
+          "unitCost": 940,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2091",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Varun)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 940,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 940,
+          "location": "Varun"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2092",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Limon (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 940,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_lemon",
+          "productName": "Bacardi Limon",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 940,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2093",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1250,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1250,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2094",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Bacardi Mango Chilli (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1250,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_varun",
+      "holdingPartnerName": "Varun",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango",
+          "productName": "Bacardi Mango Chilli",
+          "quantity": 1,
+          "unitPrice": 1250,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Varun"
+    },
+    {
+      "id": "tx_2095",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2096",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2097",
+      "type": "SALE",
+      "date": "2026-09-03",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2098",
+      "type": "SALE",
+      "date": "2026-09-05",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Smirnoff Minty Jamun (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1300,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_minti_jamun_smirnoff",
+          "productName": "Smirnoff Minty Jamun",
+          "quantity": 1,
+          "unitPrice": 1300,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
+    },
+    {
+      "id": "tx_2099",
+      "type": "SALE",
+      "date": "2026-08-24",
+      "category": "Bottle Sale",
+      "description": "Sold 1x Mango Mirchi Smirnoff (From: Mihir)",
+      "customer": "Customer",
+      "amount": 1200,
+      "cogs": 980,
+      "stockImpact": -1,
+      "holdingPartnerId": "partner_mihir",
+      "holdingPartnerName": "Mihir",
+      "paymentMethod": "UPI / Cash",
+      "paymentStatus": "PAID",
+      "items": [
+        {
+          "productId": "prod_mango_mirchi",
+          "productName": "Mango Mirchi Smirnoff",
+          "quantity": 1,
+          "unitPrice": 1200,
+          "unitCost": 980,
+          "location": "Mihir"
+        }
+      ],
+      "recordedBy": "Mihir"
     }
   ],
   "auditLogs": [
@@ -1391,6 +3724,13 @@ const DEFAULT_INITIAL_STATE = {
       "action": "DATA_IMPORT",
       "user": "Mihir",
       "details": "Cleared old records and initialized 39 sales, 7 stock purchases, 4 transport expenses, and 4 partner transfers from verified business sheets"
+    },
+    {
+      "id": "log_batch2_import",
+      "timestamp": "2026-09-07T00:18:16.936275Z",
+      "action": "DATA_IMPORT",
+      "user": "Mihir",
+      "details": "Imported Batch 2 business cycle: 79 sales (Rs. 124,150 revenue), 9 lot purchases (Rs. 137,460), 7 transport expenses (Rs. 1,570), and 29 inventory stock bottles (Rs. 39,510 valuation across Varun and Mihir)."
     }
   ]
 };
@@ -1423,10 +3763,15 @@ class StateStore {
         const saved = localStorage.getItem(key);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed && Array.isArray(parsed.transactions) && parsed.transactions.length > 0) {
-            st = parsed;
-            console.log(`Auto-migrated data from storage key: ${key}`);
-            break;
+          if (parsed && Array.isArray(parsed.transactions)) {
+            if (key === STORAGE_KEY) {
+              st = parsed;
+              break;
+            } else if (parsed.transactions.length >= DEFAULT_INITIAL_STATE.transactions.length) {
+              st = parsed;
+              console.log(`Auto-migrated data from storage key: ${key}`);
+              break;
+            }
           } else if (!st && parsed && Array.isArray(parsed.partners)) {
             st = parsed;
           }

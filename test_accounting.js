@@ -245,3 +245,40 @@ if (creditSummary.totalUnpaidCredit === 0 && creditSummary.partnerSummaries.find
   process.exit(1);
 }
 
+// Test Live Somraas Data (Batch 1 + Batch 2 Cumulative)
+console.log('\n--- Testing Somraas Live Cumulative Data (Batch 1 + Batch 2) ---');
+const fs = require('fs');
+const somraasState = JSON.parse(fs.readFileSync('./company_data.json', 'utf-8'));
+const somraasReport = AccountingEngine.calculateFinancials(somraasState, 'ALL');
+
+console.log(`Somraas Revenue: ₹${somraasReport.revenue.toLocaleString('en-IN')} (Expected: 1,85,620)`);
+console.log(`Somraas Net Profit: ₹${somraasReport.netProfit.toLocaleString('en-IN')} (Expected: 40,720)`);
+console.log(`Somraas Stock Units: ${somraasReport.totalStockUnits} (Expected: 29)`);
+console.log(`Somraas Stock Valuation: ₹${somraasReport.inventoryValuation.toLocaleString('en-IN')} (Expected: 39,510)`);
+console.log(`Somraas Liquid Cash Held: ₹${somraasReport.liquidCashBalance.toLocaleString('en-IN')} (Expected: 1,360)`);
+
+const pVarun = somraasReport.partnerSummaries.find(p => p.partnerId === 'partner_varun');
+const pMihir = somraasReport.partnerSummaries.find(p => p.partnerId === 'partner_mihir');
+const pVaishali = somraasReport.partnerSummaries.find(p => p.partnerId === 'partner_vaishali');
+
+console.log(`Varun Net Cash: ₹${pVarun.netCashHeld} (Expected: -13,501)`);
+console.log(`Mihir Net Cash: ₹${pMihir.netCashHeld} (Expected: 17,460)`);
+console.log(`Vaishali Net Cash: ₹${pVaishali.netCashHeld} (Expected: -2,599)`);
+
+if (
+  somraasReport.revenue === 185620 &&
+  somraasReport.netProfit === 40720 &&
+  somraasReport.totalStockUnits === 29 &&
+  somraasReport.inventoryValuation === 39510 &&
+  somraasReport.liquidCashBalance === 1360 &&
+  pVarun.netCashHeld === -13501 &&
+  pMihir.netCashHeld === 17460 &&
+  pVaishali.netCashHeld === -2599
+) {
+  console.log('--- ALL SOMRAAS BATCH 1 & 2 ACCOUNTING & RECONCILIATION TESTS PASSED WITH 100% ACCURACY! ---');
+} else {
+  console.error('Somraas cumulative accounting test failed!');
+  process.exit(1);
+}
+
+
