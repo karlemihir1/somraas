@@ -251,29 +251,29 @@ const fs = require('fs');
 const somraasState = JSON.parse(fs.readFileSync('./company_data.json', 'utf-8'));
 const somraasReport = AccountingEngine.calculateFinancials(somraasState, 'ALL');
 
-console.log(`Somraas Revenue: ₹${somraasReport.revenue.toLocaleString('en-IN')} (Expected: 1,85,620)`);
-console.log(`Somraas Net Profit: ₹${somraasReport.netProfit.toLocaleString('en-IN')} (Expected: 40,720)`);
-console.log(`Somraas Stock Units: ${somraasReport.totalStockUnits} (Expected: 29)`);
-console.log(`Somraas Stock Valuation: ₹${somraasReport.inventoryValuation.toLocaleString('en-IN')} (Expected: 39,510)`);
-console.log(`Somraas Liquid Cash Held: ₹${somraasReport.liquidCashBalance.toLocaleString('en-IN')} (Expected: 1,360)`);
+console.log(`Somraas Revenue: ₹${somraasReport.revenue.toLocaleString('en-IN')} (Expected: 2,34,770)`);
+console.log(`Somraas Net Profit: ₹${somraasReport.netProfit.toLocaleString('en-IN')} (Expected: 52,460)`);
+console.log(`Somraas Stock Units: ${somraasReport.totalStockUnits} (Expected: 1)`);
+console.log(`Somraas Stock Valuation: ₹${somraasReport.inventoryValuation.toLocaleString('en-IN')} (Expected: 2,100)`);
+console.log(`Somraas Liquid Cash Held: ₹${somraasReport.liquidCashBalance.toLocaleString('en-IN')} (Expected: 50,510)`);
 
 const pVarun = somraasReport.partnerSummaries.find(p => p.partnerId === 'partner_varun');
 const pMihir = somraasReport.partnerSummaries.find(p => p.partnerId === 'partner_mihir');
 const pVaishali = somraasReport.partnerSummaries.find(p => p.partnerId === 'partner_vaishali');
 
-console.log(`Varun Net Cash: ₹${pVarun.netCashHeld} (Expected: -13,501)`);
-console.log(`Mihir Net Cash: ₹${pMihir.netCashHeld} (Expected: 17,460)`);
-console.log(`Vaishali Net Cash: ₹${pVaishali.netCashHeld} (Expected: -2,599)`);
+console.log(`Varun Net Cash: ₹${pVarun.netCashHeld} (Expected: 13,049)`);
+console.log(`Mihir Net Cash: ₹${pMihir.netCashHeld} (Expected: 35,860)`);
+console.log(`Vaishali Net Cash: ₹${pVaishali.netCashHeld} (Expected: 1,601)`);
 
 if (
-  somraasReport.revenue === 185620 &&
-  somraasReport.netProfit === 40720 &&
-  somraasReport.totalStockUnits === 29 &&
-  somraasReport.inventoryValuation === 39510 &&
-  somraasReport.liquidCashBalance === 1360 &&
-  pVarun.netCashHeld === -13501 &&
-  pMihir.netCashHeld === 17460 &&
-  pVaishali.netCashHeld === -2599
+  somraasReport.revenue === 234770 &&
+  somraasReport.netProfit === 52460 &&
+  somraasReport.totalStockUnits === 1 &&
+  somraasReport.inventoryValuation === 2100 &&
+  somraasReport.liquidCashBalance === 50510 &&
+  pVarun.netCashHeld === 13049 &&
+  pMihir.netCashHeld === 35860 &&
+  pVaishali.netCashHeld === 1601
 ) {
   console.log('--- ALL SOMRAAS BATCH 1 & 2 ACCOUNTING & RECONCILIATION TESTS PASSED WITH 100% ACCURACY! ---');
 } else {
